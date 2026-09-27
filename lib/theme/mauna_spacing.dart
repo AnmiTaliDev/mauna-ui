@@ -81,6 +81,8 @@ class MaunaMetrics {
     required this.borderWidth,
     required this.cursorWidth,
     required this.iconSize,
+    required this.iconStrokeWidth,
+    required this.focusRingWidth,
     required this.popupShadowBlur,
     required this.popupShadowOffsetY,
     required this.dimmedChromeOpacity,
@@ -97,6 +99,8 @@ class MaunaMetrics {
     borderWidth: 0.5,
     cursorWidth: 2,
     iconSize: 18,
+    iconStrokeWidth: 1.5,
+    focusRingWidth: 1,
     popupShadowBlur: 8,
     popupShadowOffsetY: 2,
     dimmedChromeOpacity: 0.5,
@@ -118,6 +122,10 @@ class MaunaMetrics {
   final double cursorWidth;
 
   final double iconSize;
+
+  final double iconStrokeWidth;
+
+  final double focusRingWidth;
 
   final double popupShadowBlur;
 
@@ -141,6 +149,8 @@ class MaunaMetrics {
       borderWidth: read('border_width'),
       cursorWidth: read('cursor_width'),
       iconSize: read('icon_size'),
+      iconStrokeWidth: read('icon_stroke_width'),
+      focusRingWidth: read('focus_ring_width'),
       popupShadowBlur: read('popup_shadow_blur'),
       popupShadowOffsetY: read('popup_shadow_offset_y'),
       dimmedChromeOpacity: read('dimmed_chrome_opacity'),
@@ -159,6 +169,8 @@ class MaunaMetrics {
       'border_width': borderWidth,
       'cursor_width': cursorWidth,
       'icon_size': iconSize,
+      'icon_stroke_width': iconStrokeWidth,
+      'focus_ring_width': focusRingWidth,
       'popup_shadow_blur': popupShadowBlur,
       'popup_shadow_offset_y': popupShadowOffsetY,
       'dimmed_chrome_opacity': dimmedChromeOpacity,
@@ -181,6 +193,8 @@ class MaunaMetrics {
       borderWidth: lerpDouble(a.borderWidth, b.borderWidth, t)!,
       cursorWidth: lerpDouble(a.cursorWidth, b.cursorWidth, t)!,
       iconSize: lerpDouble(a.iconSize, b.iconSize, t)!,
+      iconStrokeWidth: lerpDouble(a.iconStrokeWidth, b.iconStrokeWidth, t)!,
+      focusRingWidth: lerpDouble(a.focusRingWidth, b.focusRingWidth, t)!,
       popupShadowBlur: lerpDouble(a.popupShadowBlur, b.popupShadowBlur, t)!,
       popupShadowOffsetY: lerpDouble(
         a.popupShadowOffsetY,

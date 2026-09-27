@@ -67,7 +67,7 @@ class MaunaSidebar extends StatelessWidget {
   }
 }
 
-class _SidebarItem extends StatelessWidget {
+class _SidebarItem extends StatefulWidget {
   const _SidebarItem({
     required this.title,
     required this.selected,
@@ -79,23 +79,44 @@ class _SidebarItem extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
+  State<_SidebarItem> createState() => _SidebarItemState();
+}
+
+class _SidebarItemState extends State<_SidebarItem> {
+  bool _focused = false;
+
+  @override
   Widget build(BuildContext context) {
     final MaunaThemeData theme = MaunaThemeData.of(context);
     return Semantics(
       button: true,
-      selected: selected,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
+      selected: widget.selected,
+      child: FocusableActionDetector(
+        mouseCursor: SystemMouseCursors.click,
+        onShowFocusHighlight: (bool value) => setState(() => _focused = value),
+        actions: <Type, Action<Intent>>{
+          ActivateIntent: CallbackAction<ActivateIntent>(
+            onInvoke: (ActivateIntent intent) => widget.onTap(),
+          ),
+        },
         child: GestureDetector(
-          onTap: onTap,
+          onTap: widget.onTap,
           child: Container(
-            color: selected ? theme.bgCanvas : null,
+            color: widget.selected ? theme.bgCanvas : null,
+            foregroundDecoration: _focused
+                ? BoxDecoration(
+                    border: Border.all(
+                      color: theme.textSecondary,
+                      width: theme.metrics.focusRingWidth,
+                    ),
+                  )
+                : null,
             padding: EdgeInsets.symmetric(
               horizontal: theme.spacing.lg,
               vertical: theme.spacing.sm,
             ),
             child: Text(
-              title,
+              widget.title,
               style: theme.uiStyle,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

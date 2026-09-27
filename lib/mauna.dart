@@ -5,6 +5,7 @@ export 'theme/mauna_theme_data.dart';
 export 'theme/mauna_theme_presets.dart';
 export 'theme/mauna_typography.dart';
 export 'widgets/mauna_document_canvas.dart';
+export 'widgets/mauna_icon.dart';
 export 'widgets/mauna_popup.dart';
 export 'widgets/mauna_sidebar.dart';
 export 'widgets/mauna_status_bar.dart';

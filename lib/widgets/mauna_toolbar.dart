@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../theme/mauna_motion.dart';
 import '../theme/mauna_theme_data.dart';
 import '../theme/mauna_typography.dart';
+import 'mauna_icon.dart';
 
 class MaunaToolbar extends StatelessWidget {
   const MaunaToolbar({
@@ -61,7 +62,7 @@ class MaunaToolbarButton extends StatefulWidget {
     this.accent = false,
   });
 
-  final IconData? icon;
+  final Path? icon;
 
   final String label;
 
@@ -95,7 +96,7 @@ class _MaunaToolbarButtonState extends State<MaunaToolbarButton> {
 
     final Widget content = widget.icon == null
         ? Text(widget.label, style: theme.uiStyle.copyWith(color: foreground))
-        : Icon(widget.icon, size: theme.metrics.iconSize, color: foreground);
+        : MaunaIcon(widget.icon!, color: foreground);
 
     return Semantics(
       button: true,
