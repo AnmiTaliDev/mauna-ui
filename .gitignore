@@ -6,3 +6,9 @@ pubspec.lock
 .flutter-plugins-dependencies
 .idea/
 *.iml
+__cmake_systeminformation/
+example/linux/
+example/macos/
+example/windows/
+example/.metadata
+example/README.md
