@@ -42,6 +42,10 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
          'text.secondary on bg.canvas is below WCAG AA 4.5:1',
        ),
        assert(
+         meetsWcagAa(textSecondary, bgChrome),
+         'text.secondary on bg.chrome is below WCAG AA 4.5:1',
+       ),
+       assert(
          radiusSm <= maxRadius && radiusLg <= maxRadius,
          'Radii above 8px are not used in Mauna',
        );
@@ -81,6 +85,44 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
       radiusSm: MaunaRadii.sm,
       radiusLg: MaunaRadii.lg,
       popupShadowOpacity: MaunaDarkColors.popupShadowOpacity,
+    );
+  }
+
+  factory MaunaThemeData.sepia({Color accent = MaunaSepiaColors.accent}) {
+    return MaunaThemeData(
+      brightness: Brightness.light,
+      bgCanvas: MaunaSepiaColors.bgCanvas,
+      bgChrome: MaunaSepiaColors.bgChrome,
+      textPrimary: MaunaSepiaColors.textPrimary,
+      textSecondary: MaunaSepiaColors.textSecondary,
+      line: MaunaSepiaColors.line,
+      accent: accent,
+      fontDoc: MaunaFonts.courierPrime,
+      fontUi: MaunaFonts.inter,
+      lineHeightDoc: MaunaLineHeights.doc,
+      lineHeightUi: MaunaLineHeights.ui,
+      radiusSm: MaunaRadii.sm,
+      radiusLg: MaunaRadii.lg,
+      popupShadowOpacity: MaunaSepiaColors.popupShadowOpacity,
+    );
+  }
+
+  factory MaunaThemeData.midnight({Color accent = MaunaMidnightColors.accent}) {
+    return MaunaThemeData(
+      brightness: Brightness.dark,
+      bgCanvas: MaunaMidnightColors.bgCanvas,
+      bgChrome: MaunaMidnightColors.bgChrome,
+      textPrimary: MaunaMidnightColors.textPrimary,
+      textSecondary: MaunaMidnightColors.textSecondary,
+      line: MaunaMidnightColors.line,
+      accent: accent,
+      fontDoc: MaunaFonts.courierPrime,
+      fontUi: MaunaFonts.inter,
+      lineHeightDoc: MaunaLineHeights.doc,
+      lineHeightUi: MaunaLineHeights.ui,
+      radiusSm: MaunaRadii.sm,
+      radiusLg: MaunaRadii.lg,
+      popupShadowOpacity: MaunaMidnightColors.popupShadowOpacity,
     );
   }
 

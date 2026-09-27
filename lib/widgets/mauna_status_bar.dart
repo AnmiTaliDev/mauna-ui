@@ -19,7 +19,7 @@ class MaunaStatusBar extends StatelessWidget {
         height: theme.metrics.statusBarHeight,
         padding: EdgeInsets.symmetric(horizontal: theme.spacing.lg),
         decoration: BoxDecoration(
-          color: theme.bgCanvas,
+          color: theme.bgChrome,
           border: Border(
             top: BorderSide(
               color: theme.line,

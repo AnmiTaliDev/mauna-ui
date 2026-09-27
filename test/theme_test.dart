@@ -8,26 +8,43 @@ void main() {
       contrastRatio(const Color(0xFF000000), const Color(0xFFFFFFFF)),
       closeTo(21, 0.01),
     );
-    expect(
-      contrastRatio(MaunaLightColors.textSecondary, MaunaLightColors.bgCanvas),
-      closeTo(4.55, 0.01),
-    );
-    expect(
-      meetsWcagAa(MaunaLightColors.textSecondary, MaunaLightColors.bgChrome),
-      isFalse,
-    );
   });
 
-  test('presets build and carry the HIG values', () {
+  test('every preset and accent pair passes WCAG AA on its backgrounds', () {
+    final List<MaunaThemeData> presets = <MaunaThemeData>[
+      MaunaThemeData.light(),
+      MaunaThemeData.dark(),
+      MaunaThemeData.sepia(),
+      MaunaThemeData.midnight(),
+    ];
+    const List<MaunaAccent> accents = <MaunaAccent>[
+      MaunaAccents.steelBlue,
+      MaunaAccents.graphite,
+      MaunaAccents.coolTeal,
+      MaunaAccents.indigo,
+    ];
+    for (final MaunaThemeData theme in presets) {
+      expect(meetsWcagAa(theme.textSecondary, theme.bgChrome), isTrue);
+      for (final MaunaAccent accent in accents) {
+        final Color color = theme.brightness == Brightness.light
+            ? accent.light
+            : accent.dark;
+        expect(meetsWcagAa(color, theme.bgCanvas), isTrue);
+        expect(meetsWcagAa(color, theme.bgChrome), isTrue);
+      }
+    }
+  });
+
+  test('presets build with their values', () {
     final MaunaThemeData light = MaunaThemeData.light();
     final MaunaThemeData dark = MaunaThemeData.dark();
     expect(light.bgCanvas, const Color(0xFFF8FAFC));
     expect(dark.textSecondary, const Color(0xFF8B94A0));
-    expect(light.accent, MaunaAccents.steelBlue);
+    expect(light.accent, MaunaAccents.steelBlue.light);
     expect(dark.popupShadowOpacity, light.popupShadowOpacity / 2);
     expect(
-      MaunaThemeData.light(accent: MaunaAccents.coolTeal).accent,
-      MaunaAccents.coolTeal,
+      MaunaThemeData.light(accent: MaunaAccents.coolTeal.light).accent,
+      MaunaAccents.coolTeal.light,
     );
   });
 
@@ -48,10 +65,10 @@ void main() {
 
   test('JSON round trip keeps every field', () {
     final MaunaThemeData source = MaunaThemeData.dark(
-      accent: MaunaAccents.indigo,
+      accent: MaunaAccents.indigo.dark,
     );
     final Map<String, Object?> json = source.toJson();
-    expect(json['accent'], '#5B5FC7');
+    expect(json['accent'], '#7F82D3');
     expect(json['bg_canvas'], '#15181E');
     final MaunaThemeData restored = MaunaThemeData.fromJson(json);
     expect(restored.toJson(), json);
