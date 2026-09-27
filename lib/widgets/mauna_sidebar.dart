@@ -10,6 +10,8 @@ class MaunaSidebar extends StatelessWidget {
     required this.items,
     required this.selectedIndex,
     required this.onSelected,
+    this.title,
+    this.width,
     this.collapsed = false,
     this.dimmed = false,
   });
@@ -20,6 +22,10 @@ class MaunaSidebar extends StatelessWidget {
 
   final ValueChanged<int> onSelected;
 
+  final String? title;
+
+  final double? width;
+
   final bool collapsed;
 
   final bool dimmed;
@@ -27,6 +33,7 @@ class MaunaSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final MaunaThemeData theme = MaunaThemeData.of(context);
+    final String? title = this.title;
     return ClipRect(
       child: AnimatedAlign(
         alignment: Alignment.centerRight,
@@ -38,7 +45,7 @@ class MaunaSidebar extends StatelessWidget {
           child: Opacity(
             opacity: dimmed ? theme.metrics.dimmedChromeOpacity : 1,
             child: Container(
-              width: theme.metrics.sidebarWidth,
+              width: width ?? theme.metrics.sidebarWidth,
               decoration: BoxDecoration(
                 color: theme.bgChrome,
                 border: Border(
@@ -48,16 +55,44 @@ class MaunaSidebar extends StatelessWidget {
                   ),
                 ),
               ),
-              child: ListView.builder(
-                padding: EdgeInsets.symmetric(vertical: theme.spacing.sm),
-                itemCount: items.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return _SidebarItem(
-                    title: items[index],
-                    selected: index == selectedIndex,
-                    onTap: () => onSelected(index),
-                  );
-                },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  if (title != null)
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        theme.spacing.md,
+                        theme.spacing.md,
+                        theme.spacing.md,
+                        theme.spacing.xs,
+                      ),
+                      child: Text(
+                        title.toUpperCase(),
+                        style: theme.labelStyle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  Expanded(
+                    child: ListView.separated(
+                      padding: EdgeInsets.symmetric(
+                        vertical: title == null
+                            ? theme.spacing.sm
+                            : theme.spacing.xs,
+                      ),
+                      itemCount: items.length,
+                      separatorBuilder: (BuildContext context, int index) =>
+                          SizedBox(height: theme.metrics.listItemGap),
+                      itemBuilder: (BuildContext context, int index) {
+                        return _SidebarItem(
+                          title: items[index],
+                          selected: index == selectedIndex,
+                          onTap: () => onSelected(index),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -83,17 +118,32 @@ class _SidebarItem extends StatefulWidget {
 }
 
 class _SidebarItemState extends State<_SidebarItem> {
+  bool _hovered = false;
   bool _focused = false;
+
+  void _setHovered(bool value) {
+    setState(() => _hovered = value);
+  }
+
+  void _setFocused(bool value) {
+    setState(() => _focused = value);
+  }
 
   @override
   Widget build(BuildContext context) {
     final MaunaThemeData theme = MaunaThemeData.of(context);
+    final bool strong = widget.selected || _hovered || _focused;
+    final TextStyle style = theme.uiStyle.copyWith(
+      color: strong ? theme.textPrimary : theme.textSecondary,
+      fontWeight: widget.selected ? FontWeight.w500 : FontWeight.w400,
+    );
     return Semantics(
       button: true,
       selected: widget.selected,
       child: FocusableActionDetector(
         mouseCursor: SystemMouseCursors.click,
-        onShowFocusHighlight: (bool value) => setState(() => _focused = value),
+        onShowHoverHighlight: _setHovered,
+        onShowFocusHighlight: _setFocused,
         actions: <Type, Action<Intent>>{
           ActivateIntent: CallbackAction<ActivateIntent>(
             onInvoke: (ActivateIntent intent) => widget.onTap(),
@@ -112,14 +162,14 @@ class _SidebarItemState extends State<_SidebarItem> {
                   )
                 : null,
             padding: EdgeInsets.symmetric(
-              horizontal: theme.spacing.lg,
-              vertical: theme.spacing.sm,
+              horizontal: theme.spacing.md,
+              vertical: theme.metrics.listItemPaddingY,
             ),
-            child: Text(
-              widget.title,
-              style: theme.uiStyle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            child: AnimatedDefaultTextStyle(
+              style: style,
+              duration: theme.motion.fast,
+              curve: MaunaMotion.fastCurve,
+              child: Text(widget.title),
             ),
           ),
         ),

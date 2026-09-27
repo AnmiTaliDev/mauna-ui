@@ -4,6 +4,9 @@ import 'package:flutter/widgets.dart';
 import '../theme/mauna_motion.dart';
 import '../theme/mauna_theme_data.dart';
 import '../theme/mauna_typography.dart';
+import 'mauna_icon.dart';
+import 'mauna_text_controller.dart';
+import 'mauna_toolbar.dart';
 
 class MaunaPopup extends StatelessWidget {
   const MaunaPopup({super.key, required this.child});
@@ -17,6 +20,7 @@ class MaunaPopup extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: theme.bgChrome,
+        border: Border.all(color: theme.line, width: theme.metrics.borderWidth),
         borderRadius: radius,
         boxShadow: <BoxShadow>[theme.popupShadow],
       ),
@@ -60,15 +64,147 @@ Future<T?> showMaunaPopup<T>({
           Animation<double> secondaryAnimation,
           Widget child,
         ) {
+          final Animation<double> curved = CurvedAnimation(
+            parent: animation,
+            curve: MaunaMotion.baseCurve,
+          );
           return FadeTransition(
-            opacity: CurvedAnimation(
-              parent: animation,
-              curve: MaunaMotion.baseCurve,
+            opacity: curved,
+            child: AnimatedBuilder(
+              animation: curved,
+              child: child,
+              builder: (BuildContext context, Widget? child) {
+                return Transform.translate(
+                  offset: Offset(0, -theme.spacing.sm * (1 - curved.value)),
+                  child: child,
+                );
+              },
             ),
-            child: child,
           );
         },
   );
+}
+
+Future<T?> showMaunaDialog<T>({
+  required BuildContext context,
+  required WidgetBuilder builder,
+  String barrierLabel = 'Close',
+}) {
+  final MaunaThemeData theme = MaunaThemeData.of(context);
+  return showGeneralDialog<T>(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: barrierLabel,
+    barrierColor: const Color(
+      0xFF000000,
+    ).withValues(alpha: theme.metrics.modalBarrierOpacity),
+    transitionDuration: theme.motion.base,
+    pageBuilder:
+        (
+          BuildContext context,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+        ) {
+          return SafeArea(
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.all(theme.spacing.md),
+                child: builder(context),
+              ),
+            ),
+          );
+        },
+    transitionBuilder:
+        (
+          BuildContext context,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+          Widget child,
+        ) {
+          final Animation<double> curved = CurvedAnimation(
+            parent: animation,
+            curve: MaunaMotion.baseCurve,
+          );
+          return FadeTransition(
+            opacity: curved,
+            child: ScaleTransition(
+              scale: Tween<double>(
+                begin: theme.metrics.dialogEnterScale,
+                end: 1,
+              ).animate(curved),
+              child: child,
+            ),
+          );
+        },
+  );
+}
+
+class MaunaDialog extends StatelessWidget {
+  const MaunaDialog({
+    super.key,
+    required this.title,
+    required this.child,
+    this.closeLabel = 'Close',
+  });
+
+  final String title;
+
+  final Widget child;
+
+  final String closeLabel;
+
+  void _close(BuildContext context) {
+    Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final MaunaThemeData theme = MaunaThemeData.of(context);
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: theme.metrics.dialogWidth),
+      child: MaunaPopup(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Container(
+              height: theme.metrics.toolbarHeight,
+              padding: EdgeInsets.only(
+                left: theme.spacing.md,
+                right: theme.spacing.xs,
+              ),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: theme.line,
+                    width: theme.metrics.borderWidth,
+                  ),
+                ),
+              ),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: theme.uiStyle.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  MaunaToolbarButton(
+                    icon: MaunaGlyphs.close(),
+                    label: closeLabel,
+                    onPressed: () => _close(context),
+                  ),
+                ],
+              ),
+            ),
+            Flexible(child: child),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class MaunaCommand {
@@ -98,9 +234,10 @@ class MaunaCommandPalette extends StatefulWidget {
 }
 
 class _MaunaCommandPaletteState extends State<MaunaCommandPalette> {
-  final TextEditingController _query = TextEditingController();
+  final MaunaTextController _query = MaunaTextController();
   final FocusNode _focusNode = FocusNode();
   int _highlighted = 0;
+  String _lastQuery = '';
 
   @override
   void initState() {
@@ -124,6 +261,10 @@ class _MaunaCommandPaletteState extends State<MaunaCommandPalette> {
   }
 
   void _onQueryChanged() {
+    if (_query.text == _lastQuery) {
+      return;
+    }
+    _lastQuery = _query.text;
     setState(() => _highlighted = 0);
   }
 
@@ -133,6 +274,10 @@ class _MaunaCommandPaletteState extends State<MaunaCommandPalette> {
       return;
     }
     setState(() => _highlighted = (_highlighted + delta) % count);
+  }
+
+  void _highlight(int index) {
+    setState(() => _highlighted = index);
   }
 
   void _run(MaunaCommand command) {
@@ -159,8 +304,16 @@ class _MaunaCommandPaletteState extends State<MaunaCommandPalette> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Padding(
-              padding: EdgeInsets.all(theme.spacing.md),
+            Container(
+              padding: EdgeInsets.all(theme.spacing.sm),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: theme.line,
+                    width: theme.metrics.borderWidth,
+                  ),
+                ),
+              ),
               child: CallbackShortcuts(
                 bindings: <ShortcutActivator, VoidCallback>{
                   const SingleActivator(LogicalKeyboardKey.arrowDown): () =>
@@ -196,14 +349,16 @@ class _MaunaCommandPaletteState extends State<MaunaCommandPalette> {
                 ),
               ),
             ),
-            Container(height: theme.metrics.borderWidth, color: theme.line),
             ConstrainedBox(
               constraints: BoxConstraints(
                 maxHeight: theme.metrics.paletteMaxHeight,
               ),
               child: matches.isEmpty
                   ? Padding(
-                      padding: EdgeInsets.all(theme.spacing.md),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: theme.spacing.md,
+                        vertical: theme.spacing.sm,
+                      ),
                       child: Text(
                         widget.emptyLabel,
                         style: theme.uiStyle.copyWith(
@@ -219,6 +374,7 @@ class _MaunaCommandPaletteState extends State<MaunaCommandPalette> {
                         return _CommandRow(
                           label: matches[index].label,
                           highlighted: index == _highlighted,
+                          onHover: () => _highlight(index),
                           onTap: () => _run(matches[index]),
                         );
                       },
@@ -235,11 +391,13 @@ class _CommandRow extends StatelessWidget {
   const _CommandRow({
     required this.label,
     required this.highlighted,
+    required this.onHover,
     required this.onTap,
   });
 
   final String label;
   final bool highlighted;
+  final VoidCallback onHover;
   final VoidCallback onTap;
 
   @override
@@ -250,15 +408,21 @@ class _CommandRow extends StatelessWidget {
       selected: highlighted,
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
+        onEnter: (PointerEnterEvent event) => onHover(),
         child: GestureDetector(
           onTap: onTap,
           child: Container(
             color: highlighted ? theme.bgCanvas : null,
             padding: EdgeInsets.symmetric(
               horizontal: theme.spacing.md,
-              vertical: theme.spacing.sm,
+              vertical: theme.metrics.listItemPaddingY,
             ),
-            child: Text(label, style: theme.uiStyle),
+            child: Text(
+              label,
+              style: theme.uiStyle.copyWith(
+                color: highlighted ? theme.textPrimary : theme.textSecondary,
+              ),
+            ),
           ),
         ),
       ),

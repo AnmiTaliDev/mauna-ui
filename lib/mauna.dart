@@ -9,4 +9,5 @@ export 'widgets/mauna_icon.dart';
 export 'widgets/mauna_popup.dart';
 export 'widgets/mauna_sidebar.dart';
 export 'widgets/mauna_status_bar.dart';
+export 'widgets/mauna_text_controller.dart';
 export 'widgets/mauna_toolbar.dart';

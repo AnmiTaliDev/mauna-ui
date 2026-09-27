@@ -19,7 +19,7 @@ void main() {
         children: <Widget>[
           MaunaToolbar(
             hidden: hidden,
-            children: <Widget>[
+            leading: <Widget>[
               MaunaToolbarButton(label: 'Save', onPressed: () {}),
             ],
           ),
@@ -43,7 +43,7 @@ void main() {
     await tester.pumpWidget(
       _app(
         MaunaToolbar(
-          children: <Widget>[
+          leading: <Widget>[
             MaunaToolbarButton(label: 'Save', onPressed: () => taps++),
             MaunaToolbarButton(
               icon: MaunaGlyphs.search(),
@@ -76,7 +76,7 @@ void main() {
     );
 
     await tester.pumpWidget(sidebar(false));
-    expect(tester.getSize(find.byType(MaunaSidebar)).width, 184);
+    expect(tester.getSize(find.byType(MaunaSidebar)).width, 200);
 
     await tester.pumpWidget(sidebar(true));
     await tester.pumpAndSettle();
@@ -109,18 +109,130 @@ void main() {
 
   testWidgets('status bar is 28px', (WidgetTester tester) async {
     await tester.pumpWidget(
-      _app(const MaunaStatusBar(items: <String>['Words: 12', 'Page 1'])),
+      _app(const MaunaStatusBar(leading: <String>['Words: 12', 'Page 1'])),
     );
     expect(tester.getSize(find.byType(MaunaStatusBar)).height, 28);
     expect(find.text('Words: 12'), findsOneWidget);
+    expect(find.text('|'), findsOneWidget);
+  });
+
+  testWidgets('selected text uses textOnAccent', (WidgetTester tester) async {
+    final MaunaTextController controller = MaunaTextController(text: 'one two');
+    addTearDown(controller.dispose);
+    controller.selection = const TextSelection(baseOffset: 4, extentOffset: 7);
+    late TextSpan span;
+    await tester.pumpWidget(
+      _app(
+        Builder(
+          builder: (BuildContext context) {
+            span = controller.buildTextSpan(
+              context: context,
+              withComposing: false,
+            );
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+    final TextSpan selected = span.children![1] as TextSpan;
+    expect(selected.text, 'two');
+    expect(selected.style!.color, MaunaLightColors.textOnAccent);
+  });
+
+  testWidgets('markup styles titles and hides markers off the caret line', (
+    WidgetTester tester,
+  ) async {
+    final MaunaTextController controller = MaunaTextController(
+      text: '# Title\n\nSome **bold** and `code`.',
+      markup: true,
+    );
+    addTearDown(controller.dispose);
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    late TextSpan onTitle;
+    late TextSpan offTitle;
+    await tester.pumpWidget(
+      _app(
+        Builder(
+          builder: (BuildContext context) {
+            onTitle = controller.buildTextSpan(
+              context: context,
+              withComposing: false,
+            );
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+    controller.selection = TextSelection.collapsed(
+      offset: controller.text.length,
+    );
+    await tester.pumpWidget(
+      _app(
+        Builder(
+          builder: (BuildContext context) {
+            offTitle = controller.buildTextSpan(
+              context: context,
+              withComposing: false,
+            );
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+    final MaunaThemeData theme = MaunaThemeData.light();
+    TextSpan child(TextSpan span, String text) => span.children!
+        .cast<TextSpan>()
+        .firstWhere((TextSpan s) => s.text == text);
+
+    expect(child(onTitle, 'Title').style!.fontSize, theme.typeScale.title);
+    expect(child(onTitle, '# ').style!.color, theme.textSecondary);
+    expect(child(offTitle, '# ').style!.color!.a, 0);
+    expect(child(offTitle, 'bold').style!.fontWeight, FontWeight.w700);
+    expect(child(offTitle, 'code').style!.backgroundColor, theme.bgChrome);
+    expect(controller.titleLines().single, const TextRange(start: 0, end: 7));
+  });
+
+  testWidgets('restore button brings the toolbar back', (
+    WidgetTester tester,
+  ) async {
+    int taps = 0;
+    await tester.pumpWidget(
+      _app(Center(child: MaunaToolbarRestoreButton(onPressed: () => taps++))),
+    );
+    expect(tester.getSize(find.byType(MaunaToolbarRestoreButton)).width, 24);
+    await tester.tap(find.byType(MaunaToolbarRestoreButton));
+    expect(taps, 1);
+  });
+
+  testWidgets('dialog shows a title and closes', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _app(
+        Builder(
+          builder: (BuildContext context) => GestureDetector(
+            onTap: () => showMaunaDialog<void>(
+              context: context,
+              builder: (BuildContext context) => const MaunaDialog(
+                title: 'Settings',
+                child: SizedBox(height: 100),
+              ),
+            ),
+            child: const Text('show'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('show'));
+    await tester.pumpAndSettle();
+    expect(find.text('Settings'), findsOneWidget);
+    await tester.tap(find.byType(MaunaToolbarButton));
+    await tester.pumpAndSettle();
+    expect(find.byType(MaunaDialog), findsNothing);
   });
 
   testWidgets('document canvas draws the accent caret and blinks', (
     WidgetTester tester,
   ) async {
-    final TextEditingController controller = TextEditingController(
-      text: 'Text',
-    );
+    final MaunaTextController controller = MaunaTextController(text: 'Text');
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       _app(MaunaDocumentCanvas(controller: controller, autofocus: true)),
@@ -147,7 +259,7 @@ void main() {
     tester.view.physicalSize = const Size(1600, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    final TextEditingController controller = TextEditingController();
+    final MaunaTextController controller = MaunaTextController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       _app(

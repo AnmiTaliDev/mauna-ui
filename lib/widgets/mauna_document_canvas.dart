@@ -1,10 +1,15 @@
 import 'dart:async';
+import 'dart:math' as math;
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../theme/mauna_theme_data.dart';
 import '../theme/mauna_typography.dart';
+import 'mauna_text_controller.dart';
 
 class MaunaDocumentCanvas extends StatefulWidget {
   const MaunaDocumentCanvas({
@@ -15,7 +20,7 @@ class MaunaDocumentCanvas extends StatefulWidget {
     this.autofocus = false,
   });
 
-  final TextEditingController controller;
+  final MaunaTextController controller;
 
   final FocusNode? focusNode;
 
@@ -46,6 +51,7 @@ class _MaunaDocumentCanvasState extends State<MaunaDocumentCanvas>
   Timer? _blinkTimer;
   bool _caretVisible = true;
   Rect? _caretRect;
+  List<double> _ruleOffsets = <double>[];
 
   FocusNode get _focusNode => widget.focusNode ?? _ownFocusNode!;
 
@@ -57,6 +63,12 @@ class _MaunaDocumentCanvasState extends State<MaunaDocumentCanvas>
     }
     widget.controller.addListener(_onEdit);
     _focusNode.addListener(_onFocusChange);
+    _scheduleCaretUpdate();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _scheduleCaretUpdate();
   }
 
@@ -120,10 +132,33 @@ class _MaunaDocumentCanvasState extends State<MaunaDocumentCanvas>
       if (editable != null && selection.isValid && selection.isCollapsed) {
         rect = editable.renderEditable.getLocalRectForCaret(selection.extent);
       }
-      if (rect != _caretRect) {
-        setState(() => _caretRect = rect);
+      final List<double> rules = editable == null
+          ? <double>[]
+          : _titleRuleOffsets(editable.renderEditable);
+      if (rect != _caretRect || !listEquals(rules, _ruleOffsets)) {
+        setState(() {
+          _caretRect = rect;
+          _ruleOffsets = rules;
+        });
       }
     });
+  }
+
+  List<double> _titleRuleOffsets(RenderEditable renderEditable) {
+    if (!widget.controller.markup) {
+      return <double>[];
+    }
+    final double gap = MaunaThemeData.of(context).spacing.xs;
+    return <double>[
+      for (final TextRange line in widget.controller.titleLines())
+        renderEditable
+                .getBoxesForSelection(
+                  TextSelection(baseOffset: line.start, extentOffset: line.end),
+                )
+                .map((TextBox box) => box.bottom)
+                .reduce(math.max) +
+            gap,
+    ];
   }
 
   @override
@@ -136,8 +171,8 @@ class _MaunaDocumentCanvasState extends State<MaunaDocumentCanvas>
       color: theme.bgCanvas,
       child: SingleChildScrollView(
         padding: EdgeInsets.symmetric(
-          horizontal: theme.spacing.xl,
-          vertical: theme.spacing.xxxl,
+          horizontal: theme.spacing.lg,
+          vertical: theme.spacing.xxl,
         ),
         child: Center(
           child: ConstrainedBox(
@@ -165,6 +200,9 @@ class _MaunaDocumentCanvasState extends State<MaunaDocumentCanvas>
                       focusNode: _focusNode,
                       autofocus: widget.autofocus,
                       style: theme.docStyle,
+                      strutStyle: widget.controller.markup
+                          ? StrutStyle.disabled
+                          : null,
                       cursorColor: theme.accent,
                       backgroundCursorColor: theme.textSecondary,
                       cursorWidth: theme.metrics.cursorWidth,
@@ -176,6 +214,16 @@ class _MaunaDocumentCanvasState extends State<MaunaDocumentCanvas>
                       rendererIgnoresPointer: true,
                     ),
                   ),
+                  for (final double offset in _ruleOffsets)
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      top: offset,
+                      height: theme.metrics.borderWidth,
+                      child: IgnorePointer(
+                        child: ColoredBox(color: theme.line),
+                      ),
+                    ),
                   if (caret != null && _focusNode.hasFocus && _caretVisible)
                     Positioned(
                       left: caret.left,
