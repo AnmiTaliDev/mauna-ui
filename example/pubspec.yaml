@@ -20,3 +20,19 @@ dev_dependencies:
 
 flutter:
   uses-material-design: false
+  fonts:
+    - family: Courier Prime
+      fonts:
+        - asset: fonts/CourierPrime-Regular.ttf
+        - asset: fonts/CourierPrime-Bold.ttf
+          weight: 700
+        - asset: fonts/CourierPrime-Italic.ttf
+          style: italic
+        - asset: fonts/CourierPrime-BoldItalic.ttf
+          weight: 700
+          style: italic
+    - family: Inter
+      fonts:
+        - asset: fonts/Inter-Regular.ttf
+        - asset: fonts/Inter-Medium.ttf
+          weight: 500

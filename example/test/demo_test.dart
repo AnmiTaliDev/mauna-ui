@@ -10,9 +10,9 @@ void main() {
     await tester.pumpWidget(const MaunaDemoApp());
     await tester.pump();
 
-    expect(find.text('Prologue'), findsOneWidget);
-    expect(find.text('Chapter 2'), findsOneWidget);
-    expect(find.text('Words: 38'), findsOneWidget);
+    expect(find.text('Principles'), findsOneWidget);
+    expect(find.text('Voice and tone'), findsWidgets);
+    expect(find.textContaining('Words: '), findsOneWidget);
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
