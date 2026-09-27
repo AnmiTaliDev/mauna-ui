@@ -18,6 +18,7 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
     required this.textSecondary,
     required this.line,
     required this.accent,
+    required this.textOnAccent,
     required this.fontDoc,
     required this.fontUi,
     required this.lineHeightDoc,
@@ -59,6 +60,7 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
       textSecondary: MaunaLightColors.textSecondary,
       line: MaunaLightColors.line,
       accent: accent,
+      textOnAccent: MaunaLightColors.textOnAccent,
       fontDoc: MaunaFonts.courierPrime,
       fontUi: MaunaFonts.inter,
       lineHeightDoc: MaunaLineHeights.doc,
@@ -78,6 +80,7 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
       textSecondary: MaunaDarkColors.textSecondary,
       line: MaunaDarkColors.line,
       accent: accent,
+      textOnAccent: MaunaDarkColors.textOnAccent,
       fontDoc: MaunaFonts.courierPrime,
       fontUi: MaunaFonts.inter,
       lineHeightDoc: MaunaLineHeights.doc,
@@ -97,6 +100,7 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
       textSecondary: MaunaSepiaColors.textSecondary,
       line: MaunaSepiaColors.line,
       accent: accent,
+      textOnAccent: MaunaSepiaColors.textOnAccent,
       fontDoc: MaunaFonts.courierPrime,
       fontUi: MaunaFonts.inter,
       lineHeightDoc: MaunaLineHeights.doc,
@@ -116,6 +120,7 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
       textSecondary: MaunaMidnightColors.textSecondary,
       line: MaunaMidnightColors.line,
       accent: accent,
+      textOnAccent: MaunaMidnightColors.textOnAccent,
       fontDoc: MaunaFonts.courierPrime,
       fontUi: MaunaFonts.inter,
       lineHeightDoc: MaunaLineHeights.doc,
@@ -135,6 +140,7 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
       textSecondary: _colorFromHex(json['text_secondary']! as String),
       line: _colorFromHex(json['line']! as String),
       accent: _colorFromHex(json['accent']! as String),
+      textOnAccent: _colorFromHex(json['text_on_accent']! as String),
       fontDoc: json['font_doc']! as String,
       fontUi: json['font_ui']! as String,
       lineHeightDoc: (json['line_height_doc']! as num).toDouble(),
@@ -169,6 +175,8 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
 
   final Color accent;
 
+  final Color textOnAccent;
+
   final String fontDoc;
 
   final String fontUi;
@@ -197,8 +205,7 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
     blurRadius: metrics.popupShadowBlur,
   );
 
-  Color get selectionColor =>
-      accent.withValues(alpha: metrics.selectionOpacity);
+  Color get selectionColor => accent;
 
   ThemeData toMaterialTheme() {
     final ColorScheme base = brightness == Brightness.light
@@ -239,6 +246,7 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
     Color? textSecondary,
     Color? line,
     Color? accent,
+    Color? textOnAccent,
     String? fontDoc,
     String? fontUi,
     double? lineHeightDoc,
@@ -259,6 +267,7 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
       textSecondary: textSecondary ?? this.textSecondary,
       line: line ?? this.line,
       accent: accent ?? this.accent,
+      textOnAccent: textOnAccent ?? this.textOnAccent,
       fontDoc: fontDoc ?? this.fontDoc,
       fontUi: fontUi ?? this.fontUi,
       lineHeightDoc: lineHeightDoc ?? this.lineHeightDoc,
@@ -287,6 +296,7 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
       textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
       line: Color.lerp(line, other.line, t)!,
       accent: Color.lerp(accent, other.accent, t)!,
+      textOnAccent: Color.lerp(textOnAccent, other.textOnAccent, t)!,
       fontDoc: first ? fontDoc : other.fontDoc,
       fontUi: first ? fontUi : other.fontUi,
       lineHeightDoc: lerpDouble(lineHeightDoc, other.lineHeightDoc, t)!,
@@ -313,6 +323,7 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
     required this.textSecondary,
     required this.line,
     required this.accent,
+    required this.textOnAccent,
     required this.fontDoc,
     required this.fontUi,
     required this.lineHeightDoc,
@@ -335,6 +346,7 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
       'text_secondary': _colorToHex(textSecondary),
       'line': _colorToHex(line),
       'accent': _colorToHex(accent),
+      'text_on_accent': _colorToHex(textOnAccent),
       'font_doc': fontDoc,
       'font_ui': fontUi,
       'line_height_doc': lineHeightDoc,

@@ -43,6 +43,8 @@ abstract final class MaunaLightColors {
 
   static const Color accent = Color(0xFF36669B);
 
+  static const Color textOnAccent = Color(0xFFFBFAF7);
+
   static const double popupShadowOpacity = 0.08;
 }
 
@@ -58,6 +60,8 @@ abstract final class MaunaDarkColors {
   static const Color line = Color(0xFF2E3440);
 
   static const Color accent = Color(0xFF5B8FC7);
+
+  static const Color textOnAccent = Color(0xFF1C1B19);
 
   static const double popupShadowOpacity = 0.04;
 }
@@ -75,6 +79,8 @@ abstract final class MaunaSepiaColors {
 
   static const Color accent = Color(0xFF36669B);
 
+  static const Color textOnAccent = Color(0xFFFBFAF7);
+
   static const double popupShadowOpacity = 0.08;
 }
 
@@ -91,6 +97,8 @@ abstract final class MaunaMidnightColors {
 
   static const Color accent = Color(0xFF5B8FC7);
 
+  static const Color textOnAccent = Color(0xFF1C1B19);
+
   static const double popupShadowOpacity = 0.04;
 }
 
@@ -100,6 +108,22 @@ abstract final class MaunaFonts {
   static const String jetBrainsMono = 'JetBrains Mono';
 
   static const String inter = 'Inter';
+
+  static const List<String> docFallback = <String>[
+    'Courier New',
+    'Courier',
+    'Liberation Mono',
+    'DejaVu Sans Mono',
+    'monospace',
+  ];
+
+  static const List<String> uiFallback = <String>[
+    'Segoe UI',
+    'Roboto',
+    'Cantarell',
+    'Noto Sans',
+    'sans-serif',
+  ];
 }
 
 abstract final class MaunaLineHeights {

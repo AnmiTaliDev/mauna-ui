@@ -25,12 +25,14 @@ void main() {
     ];
     for (final MaunaThemeData theme in presets) {
       expect(meetsWcagAa(theme.textSecondary, theme.bgChrome), isTrue);
+      expect(meetsWcagAa(theme.textOnAccent, theme.accent), isTrue);
       for (final MaunaAccent accent in accents) {
         final Color color = theme.brightness == Brightness.light
             ? accent.light
             : accent.dark;
         expect(meetsWcagAa(color, theme.bgCanvas), isTrue);
         expect(meetsWcagAa(color, theme.bgChrome), isTrue);
+        expect(meetsWcagAa(theme.textOnAccent, color), isTrue);
       }
     }
   });
