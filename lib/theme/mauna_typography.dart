@@ -72,6 +72,7 @@ class MaunaTypeScale {
 
 extension MaunaTextStyles on MaunaThemeData {
   TextStyle get captionStyle => TextStyle(
+    inherit: false,
     fontFamily: fontUi,
     fontSize: typeScale.caption,
     height: lineHeightUi,
@@ -80,6 +81,7 @@ extension MaunaTextStyles on MaunaThemeData {
   );
 
   TextStyle get uiStyle => TextStyle(
+    inherit: false,
     fontFamily: fontUi,
     fontSize: typeScale.ui,
     height: lineHeightUi,
@@ -88,6 +90,7 @@ extension MaunaTextStyles on MaunaThemeData {
   );
 
   TextStyle get docStyle => TextStyle(
+    inherit: false,
     fontFamily: fontDoc,
     fontSize: typeScale.doc,
     height: lineHeightDoc,
@@ -96,6 +99,7 @@ extension MaunaTextStyles on MaunaThemeData {
   );
 
   TextStyle get headingStyle => TextStyle(
+    inherit: false,
     fontFamily: fontUi,
     fontSize: typeScale.heading,
     height: lineHeightUi,
@@ -104,6 +108,7 @@ extension MaunaTextStyles on MaunaThemeData {
   );
 
   TextStyle get titleStyle => TextStyle(
+    inherit: false,
     fontFamily: fontUi,
     fontSize: typeScale.title,
     height: typeScale.lineHeightTitle,
