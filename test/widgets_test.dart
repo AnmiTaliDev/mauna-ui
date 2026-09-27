@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mauna/mauna.dart';
 
@@ -19,7 +20,7 @@ void main() {
           MaunaToolbar(
             hidden: hidden,
             children: <Widget>[
-              MaunaToolbarButton(label: 'Сохранить', onPressed: () {}),
+              MaunaToolbarButton(label: 'Save', onPressed: () {}),
             ],
           ),
         ],
@@ -28,7 +29,7 @@ void main() {
 
     await tester.pumpWidget(toolbar(false));
     expect(tester.getSize(find.byType(MaunaToolbar)).height, 40);
-    expect(find.text('Сохранить'), findsOneWidget);
+    expect(find.text('Save'), findsOneWidget);
 
     await tester.pumpWidget(toolbar(true));
     await tester.pumpAndSettle();
@@ -43,20 +44,21 @@ void main() {
       _app(
         MaunaToolbar(
           children: <Widget>[
-            MaunaToolbarButton(label: 'Сохранить', onPressed: () => taps++),
+            MaunaToolbarButton(label: 'Save', onPressed: () => taps++),
             MaunaToolbarButton(
-              icon: Icons.search_outlined,
-              label: 'Найти',
+              icon: MaunaGlyphs.search(),
+              label: 'Find',
               onPressed: () {},
             ),
           ],
         ),
       ),
     );
-    await tester.tap(find.text('Сохранить'));
+    await tester.tap(find.text('Save'));
     expect(taps, 1);
-    expect(find.byIcon(Icons.search_outlined), findsOneWidget);
-    expect(find.text('Найти'), findsNothing);
+    expect(find.byType(MaunaIcon), findsOneWidget);
+    expect(tester.getSize(find.byType(MaunaIcon)), const Size.square(18));
+    expect(find.text('Find'), findsNothing);
   });
 
   testWidgets('sidebar collapses to zero width', (WidgetTester tester) async {
@@ -64,7 +66,7 @@ void main() {
       Row(
         children: <Widget>[
           MaunaSidebar(
-            items: const <String>['Пролог', 'Глава 1'],
+            items: const <String>['Prologue', 'Chapter 1'],
             selectedIndex: 0,
             onSelected: (int index) {},
             collapsed: collapsed,
@@ -81,19 +83,43 @@ void main() {
     expect(tester.getSize(find.byType(MaunaSidebar)).width, 0);
   });
 
+  testWidgets('sidebar items work from the keyboard', (
+    WidgetTester tester,
+  ) async {
+    int? picked;
+    await tester.pumpWidget(
+      _app(
+        Row(
+          children: <Widget>[
+            MaunaSidebar(
+              items: const <String>['Prologue', 'Chapter 1'],
+              selectedIndex: 0,
+              onSelected: (int index) => picked = index,
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    expect(picked, 1);
+  });
+
   testWidgets('status bar is 28px', (WidgetTester tester) async {
     await tester.pumpWidget(
-      _app(const MaunaStatusBar(items: <String>['Слов: 12', 'Страница 1'])),
+      _app(const MaunaStatusBar(items: <String>['Words: 12', 'Page 1'])),
     );
     expect(tester.getSize(find.byType(MaunaStatusBar)).height, 28);
-    expect(find.text('Слов: 12'), findsOneWidget);
+    expect(find.text('Words: 12'), findsOneWidget);
   });
 
   testWidgets('document canvas draws the accent caret and blinks', (
     WidgetTester tester,
   ) async {
     final TextEditingController controller = TextEditingController(
-      text: 'Текст',
+      text: 'Text',
     );
     addTearDown(controller.dispose);
     await tester.pumpWidget(
@@ -127,12 +153,12 @@ void main() {
       _app(
         MaunaDocumentCanvas(
           controller: controller,
-          placeholder: 'Начните писать',
+          placeholder: 'Start writing',
         ),
       ),
     );
     expect(tester.getSize(find.byType(EditableText)).width, 620);
-    expect(find.text('Начните писать'), findsOneWidget);
+    expect(find.text('Start writing'), findsOneWidget);
   });
 
   testWidgets('command palette filters and runs a command', (
@@ -147,31 +173,25 @@ void main() {
               context: context,
               builder: (BuildContext context) => MaunaCommandPalette(
                 commands: <MaunaCommand>[
-                  MaunaCommand(
-                    label: 'Сохранить',
-                    onSelected: () => ran = 'save',
-                  ),
-                  MaunaCommand(
-                    label: 'Открыть',
-                    onSelected: () => ran = 'open',
-                  ),
+                  MaunaCommand(label: 'Save', onSelected: () => ran = 'save'),
+                  MaunaCommand(label: 'Open', onSelected: () => ran = 'open'),
                 ],
               ),
             ),
-            child: const Text('open'),
+            child: const Text('show'),
           ),
         ),
       ),
     );
-    await tester.tap(find.text('open'));
+    await tester.tap(find.text('show'));
     await tester.pumpAndSettle();
-    expect(find.text('Введите команду'), findsOneWidget);
+    expect(find.text('Enter a command'), findsOneWidget);
 
-    await tester.enterText(find.byType(EditableText), 'откр');
+    await tester.enterText(find.byType(EditableText), 'op');
     await tester.pump();
-    expect(find.text('Сохранить'), findsNothing);
+    expect(find.text('Save'), findsNothing);
 
-    await tester.tap(find.text('Открыть'));
+    await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
     expect(ran, 'open');
     expect(find.byType(MaunaCommandPalette), findsNothing);

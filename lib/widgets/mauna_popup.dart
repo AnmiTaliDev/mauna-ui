@@ -28,7 +28,7 @@ class MaunaPopup extends StatelessWidget {
 Future<T?> showMaunaPopup<T>({
   required BuildContext context,
   required WidgetBuilder builder,
-  String barrierLabel = 'Закрыть',
+  String barrierLabel = 'Close',
 }) {
   final MaunaThemeData theme = MaunaThemeData.of(context);
   return showGeneralDialog<T>(
@@ -83,8 +83,8 @@ class MaunaCommandPalette extends StatefulWidget {
   const MaunaCommandPalette({
     super.key,
     required this.commands,
-    this.placeholder = 'Введите команду',
-    this.emptyLabel = 'Нет подходящих команд',
+    this.placeholder = 'Enter a command',
+    this.emptyLabel = 'No matching commands',
   });
 
   final List<MaunaCommand> commands;
