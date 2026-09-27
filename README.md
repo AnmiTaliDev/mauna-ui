@@ -18,12 +18,24 @@ flutter analyze
 flutter test
 ```
 
+## Demo
+
+`example/` holds a small editor built from the package widgets. Platform folders are not committed. Generate them once, then run:
+
+```sh
+cd example
+flutter create --platforms=linux,macos,windows .
+flutter run -d linux
+```
+
+Shortcuts: Ctrl+K opens the command palette, Ctrl+B toggles the sidebar, Ctrl+Shift+F toggles focus mode, Escape leaves focus mode. Lines starting with `# ` appear in the sidebar.
+
 ## Usage
 
 ```dart
 MaterialApp(
   theme: MaunaThemeData.light().toMaterialTheme(),
-  darkTheme: MaunaThemeData.dark(accent: MaunaAccents.coolTeal).toMaterialTheme(),
+  darkTheme: MaunaThemeData.dark(accent: MaunaAccents.coolTeal.dark).toMaterialTheme(),
   home: ...,
 );
 ```
@@ -92,36 +104,48 @@ Without these entries Flutter falls back to the platform font.
 | Border 0.5px | `metrics.borderWidth` |
 | Caret 2px | `metrics.cursorWidth` |
 | Icon 16-20px | `metrics.iconSize` (18) |
+| Icon stroke 1.5px | `metrics.iconStrokeWidth` |
 | Popup shadow `0 2px 8px` | `metrics.popupShadowOffsetY`, `metrics.popupShadowBlur`, `popupShadowOpacity`, `popupShadow` |
-| Accent options | `MaunaAccents.steelBlue`, `graphite`, `coolTeal`, `indigo` |
+| Accent options | `MaunaAccents.steelBlue`, `graphite`, `coolTeal`, `indigo` (`.light` and `.dark`) |
+| Presets Paper, Ink, Sepia, Midnight | `MaunaThemeData.light`, `.dark`, `.sepia`, `.midnight` |
 
 JSON keys for the C struct fields match the HIG snake_case names. The remaining groups are nested under `type`, `space`, `motion` and `metrics`.
 
-## Values not defined by the HIG
+## Deviations from the HIG
 
-These values are inferred from the HIG principles:
+These values differ from the HIG text or fill gaps in it:
 
+- Light `text.secondary` is `#5F6E84` instead of `#64748B`. The HIG value is 4.23:1 on `bg.chrome`. The new value passes 4.5:1 on canvas and chrome, and the theme asserts both pairs.
+- Accents are light and dark pairs. One hex cannot reach 4.5:1 on both base themes. Each variant passes 4.5:1 on canvas and chrome of every preset with the same brightness.
+
+| Accent | Light | Dark |
+|---|---|---|
+| Steel blue | `#36669B` | `#5B8FC7` |
+| Graphite | `#5A5D66` | `#858994` |
+| Cool teal | `#226F64` | `#2F9A8A` |
+| Indigo | `#5156C4` | `#7F82D3` |
+
+- Sepia preset: canvas `#F4EEE1`, chrome `#EAE2D1`, text `#2B2620` / `#6D6254`, line `#DCD2BE`, light accents, shadow alpha 0.08.
+- Midnight preset: canvas `#0E1117`, chrome `#151A23`, text `#DDE3EC` / `#7F8A9A`, line `#252C38`, dark accents, shadow alpha 0.04.
 - `metrics.dimmedChromeOpacity` (0.5): opacity of chrome in focus mode.
 - `metrics.selectionOpacity` (0.25): alpha of the `accent` selection fill.
 - `metrics.paletteWidth` (480) and `metrics.paletteMaxHeight` (320).
+- `metrics.focusRingWidth` (1): sidebar items show a keyboard focus ring in `text.secondary`.
 - Hover and keyboard focus on toolbar buttons: `bg.canvas` fill with `radius.sm`. Disabled buttons use `text.secondary`.
-- The status bar fill is `bg.canvas`, because `text.secondary` on `bg.chrome` in the light theme is 4.23:1, below WCAG AA.
 - `headingStyle` and `titleStyle` use Medium weight.
-- Sidebar right border and status bar top border: 0.5px `line`, like the toolbar bottom border.
+- Sidebar right border and status bar top border: 0.5px `line`, like the toolbar bottom border. The status bar fill is `bg.chrome`.
 - Document placeholder in `text.secondary`. Vertical page padding `space.3xl`.
 - Popup barrier is transparent. The popup sits `space.3xl` below the top edge.
 - Command palette: highlighted row uses the `bg.canvas` fill, and a 0.5px `line` divider separates the field and the list.
 - The caret blink value (530ms) is the interval between visibility toggles.
 
-## Known limitations
+## Icons
 
-- Icon stroke width (1.5px, HIG §7) cannot be set on font glyphs. Pass outline glyphs drawn at that stroke.
-- Sidebar items respond to pointer input only. They are not in the keyboard focus order.
+Icon fonts cannot be drawn with a fixed stroke width, so toolbar buttons take a `Path` on a 24-unit grid instead of `IconData`. `MaunaIcon` scales the path to `metrics.iconSize` and strokes it at `metrics.iconStrokeWidth` screen pixels. `MaunaGlyphs` has `sidebar`, `focus`, `command`, `search`, `sun` and `moon`. Other glyphs are plain `Path` objects on the same grid.
 
 ## Acknowledgments
 
-- [Mauna HIG](https://github.com/AnmiTaliDev/mauna-hig)
-- Courier Prime, Inter (SIL OFL 1.1) and JetBrains Mono (Apache 2.0), used by name
+- Courier Prime and Inter (SIL OFL 1.1), JetBrains Mono (Apache 2.0)
 
 ## Documentation
 
