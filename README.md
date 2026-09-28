@@ -175,7 +175,6 @@ Icon fonts cannot be drawn with a fixed stroke width, so toolbar buttons take a 
 ## Documentation
 
 - Design guidelines: <https://github.com/AnmiTaliDev/mauna-hig>
-- CONTRIBUTING.md is not written yet.
 
 ## License
 
