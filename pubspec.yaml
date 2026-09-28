@@ -1,7 +1,13 @@
 name: mauna
-description: Theme tokens and base widgets for the Mauna design system.
+description: Theme tokens and base widgets of the Mauna design system for writing apps built around a text editor.
 version: 0.1.0
-publish_to: none
+repository: https://github.com/AnmiTaliDev/mauna-ui
+issue_tracker: https://github.com/AnmiTaliDev/mauna-ui/issues
+topics:
+  - design-system
+  - theme
+  - widgets
+  - editor
 
 environment:
   sdk: ^3.8.0
