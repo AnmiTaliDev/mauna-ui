@@ -1,4 +1,4 @@
-## Unreleased
+## 0.2.0
 
 - Command palette: the list scrolls to the row chosen with the arrow keys.
 - Command palette: fuzzy search. Labels that contain the query come first, labels that only hold its letters in order come after them.
