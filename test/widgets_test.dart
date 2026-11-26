@@ -108,6 +108,43 @@ void main() {
     expect(screen.contains(tester.getCenter(find.text('Scene 70'))), isTrue);
   });
 
+  testWidgets('sidebar reports a drag onto an allowed item', (
+    WidgetTester tester,
+  ) async {
+    final List<(int, int)> moves = <(int, int)>[];
+    await tester.pumpWidget(
+      _app(
+        Row(
+          children: <Widget>[
+            MaunaSidebar(
+              items: const <String>['One', 'Two', 'Three'],
+              selectedIndex: 0,
+              onSelected: (int index) {},
+              onReorder: (int from, int to) => moves.add((from, to)),
+              canReorder: (int from, int to) => to != 2,
+            ),
+          ],
+        ),
+      ),
+    );
+    Future<void> drag(String from, String to) async {
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(find.text(from)),
+      );
+      await tester.pump();
+      await gesture.moveBy(const Offset(0, 24));
+      await tester.pump();
+      await gesture.moveTo(tester.getCenter(find.text(to).first));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+    }
+
+    await drag('One', 'Two');
+    await drag('One', 'Three');
+    expect(moves, <(int, int)>[(0, 1)]);
+  });
+
   testWidgets('sidebar items work from the keyboard', (
     WidgetTester tester,
   ) async {

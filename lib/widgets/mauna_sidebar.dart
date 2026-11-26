@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../theme/mauna_motion.dart';
 import '../theme/mauna_theme_data.dart';
 import '../theme/mauna_typography.dart';
+import 'mauna_popup.dart';
 
 class MaunaSidebar extends StatefulWidget {
   const MaunaSidebar({
@@ -14,6 +15,8 @@ class MaunaSidebar extends StatefulWidget {
     this.width,
     this.collapsed = false,
     this.dimmed = false,
+    this.onReorder,
+    this.canReorder,
   });
 
   final List<String> items;
@@ -29,6 +32,10 @@ class MaunaSidebar extends StatefulWidget {
   final bool collapsed;
 
   final bool dimmed;
+
+  final void Function(int from, int to)? onReorder;
+
+  final bool Function(int from, int to)? canReorder;
 
   @override
   State<MaunaSidebar> createState() => _MaunaSidebarState();
@@ -65,6 +72,30 @@ class _MaunaSidebarState extends State<MaunaSidebar> {
         Scrollable.ensureVisible(item, alignmentPolicy: policy);
       }
     });
+  }
+
+  bool _accepts(int from, int to) {
+    return from != to && (widget.canReorder?.call(from, to) ?? true);
+  }
+
+  Widget _item(int index) {
+    final Widget item = _SidebarItem(
+      title: widget.items[index],
+      selected: index == widget.selectedIndex,
+      onTap: () => widget.onSelected(index),
+    );
+    final void Function(int from, int to)? onReorder = widget.onReorder;
+    if (onReorder == null) {
+      return item;
+    }
+    return _ReorderableItem(
+      index: index,
+      title: widget.items[index],
+      width: widget.width,
+      accepts: (int from) => _accepts(from, index),
+      onAccept: (int from) => onReorder(from, index),
+      child: item,
+    );
   }
 
   @override
@@ -126,11 +157,7 @@ class _MaunaSidebarState extends State<MaunaSidebar> {
                               key: i == widget.selectedIndex
                                   ? _selectedItem
                                   : null,
-                              child: _SidebarItem(
-                                title: widget.items[i],
-                                selected: i == widget.selectedIndex,
-                                onTap: () => widget.onSelected(i),
-                              ),
+                              child: _item(i),
                             ),
                         ],
                       ),
@@ -142,6 +169,85 @@ class _MaunaSidebarState extends State<MaunaSidebar> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ReorderableItem extends StatelessWidget {
+  const _ReorderableItem({
+    required this.index,
+    required this.title,
+    required this.width,
+    required this.accepts,
+    required this.onAccept,
+    required this.child,
+  });
+
+  final int index;
+  final String title;
+  final double? width;
+  final bool Function(int from) accepts;
+  final ValueChanged<int> onAccept;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final MaunaThemeData theme = MaunaThemeData.of(context);
+    return DragTarget<int>(
+      onWillAcceptWithDetails: (DragTargetDetails<int> details) =>
+          accepts(details.data),
+      onAcceptWithDetails: (DragTargetDetails<int> details) =>
+          onAccept(details.data),
+      builder:
+          (
+            BuildContext context,
+            List<int?> candidates,
+            List<dynamic> rejected,
+          ) {
+            final int? from = candidates.firstOrNull;
+            final BorderSide mark = BorderSide(
+              color: theme.accent,
+              width: theme.metrics.cursorWidth,
+            );
+            return Draggable<int>(
+              data: index,
+              maxSimultaneousDrags: 1,
+              dragAnchorStrategy: pointerDragAnchorStrategy,
+              feedback: SizedBox(
+                width: width ?? theme.metrics.sidebarWidth,
+                child: MaunaPopup(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: theme.spacing.md,
+                      vertical: theme.metrics.listItemPaddingY,
+                    ),
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.uiStyle,
+                    ),
+                  ),
+                ),
+              ),
+              childWhenDragging: Opacity(
+                opacity: theme.metrics.dimmedChromeOpacity,
+                child: child,
+              ),
+              child: DecoratedBox(
+                position: DecorationPosition.foreground,
+                decoration: BoxDecoration(
+                  border: from == null
+                      ? null
+                      : Border(
+                          top: from > index ? mark : BorderSide.none,
+                          bottom: from < index ? mark : BorderSide.none,
+                        ),
+                ),
+                child: child,
+              ),
+            );
+          },
     );
   }
 }
