@@ -3,6 +3,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mauna/mauna.dart';
 
 void main() {
+  test('type scale and metrics copy one value', () {
+    final MaunaTypeScale type = MaunaTypeScale.standard.copyWith(doc: 20);
+    expect(type.doc, 20);
+    expect(type.ui, MaunaTypeScale.standard.ui);
+    final MaunaMetrics metrics = MaunaMetrics.standard.copyWith(
+      documentColumnWidth: 700,
+    );
+    expect(metrics.documentColumnWidth, 700);
+    expect(metrics.sidebarWidth, MaunaMetrics.standard.sidebarWidth);
+  });
+
   test('contrast ratio matches WCAG reference values', () {
     expect(
       contrastRatio(const Color(0xFF000000), const Color(0xFFFFFFFF)),

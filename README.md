@@ -51,6 +51,8 @@ With `MaunaTextController(markup: true)` the canvas styles the document like the
 - Markers are hidden on lines without the caret and shown in `text.secondary` on the caret line.
 - Blank lines between blocks take `space.md`.
 
+The command palette matches commands fuzzily and shows the optional `MaunaCommand.shortcut`. `MaunaSidebar` keeps the selected item in view, and with `onReorder` its items can be dragged. `MaunaDocumentCanvas` has a context menu whose names come from `contextMenuLabels`.
+
 ## Fonts
 
 The package does not bundle font files and does not use `google_fonts`. The theme refers to families by name: `Courier Prime` (or `JetBrains Mono`) for `font.doc` and `Inter` for `font.ui`. The app declares them in its own `pubspec.yaml`:

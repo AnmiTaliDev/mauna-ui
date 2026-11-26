@@ -71,6 +71,28 @@ class MaunaTypeScale {
     };
   }
 
+  MaunaTypeScale copyWith({
+    double? caption,
+    double? ui,
+    double? doc,
+    double? heading,
+    double? title,
+    double? lineHeightTitle,
+    double? labelLetterSpacing,
+    double? inlineCodeScale,
+  }) {
+    return MaunaTypeScale(
+      caption: caption ?? this.caption,
+      ui: ui ?? this.ui,
+      doc: doc ?? this.doc,
+      heading: heading ?? this.heading,
+      title: title ?? this.title,
+      lineHeightTitle: lineHeightTitle ?? this.lineHeightTitle,
+      labelLetterSpacing: labelLetterSpacing ?? this.labelLetterSpacing,
+      inlineCodeScale: inlineCodeScale ?? this.inlineCodeScale,
+    );
+  }
+
   static MaunaTypeScale lerp(MaunaTypeScale a, MaunaTypeScale b, double t) {
     return MaunaTypeScale(
       caption: lerpDouble(a.caption, b.caption, t)!,

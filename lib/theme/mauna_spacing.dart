@@ -234,6 +234,60 @@ class MaunaMetrics {
     };
   }
 
+  MaunaMetrics copyWith({
+    double? toolbarHeight,
+    double? toolbarButtonSize,
+    double? restoreButtonSize,
+    double? statusBarHeight,
+    double? sidebarWidth,
+    double? listItemPaddingY,
+    double? listItemGap,
+    double? documentColumnWidth,
+    double? borderWidth,
+    double? cursorWidth,
+    double? iconSize,
+    double? smallIconSize,
+    double? chipIconSize,
+    double? iconStrokeWidth,
+    double? focusRingWidth,
+    double? popupShadowBlur,
+    double? popupShadowOffsetY,
+    double? modalBarrierOpacity,
+    double? dimmedChromeOpacity,
+    double? separatorOpacity,
+    double? paletteWidth,
+    double? paletteMaxHeight,
+    double? dialogWidth,
+    double? dialogEnterScale,
+  }) {
+    return MaunaMetrics(
+      toolbarHeight: toolbarHeight ?? this.toolbarHeight,
+      toolbarButtonSize: toolbarButtonSize ?? this.toolbarButtonSize,
+      restoreButtonSize: restoreButtonSize ?? this.restoreButtonSize,
+      statusBarHeight: statusBarHeight ?? this.statusBarHeight,
+      sidebarWidth: sidebarWidth ?? this.sidebarWidth,
+      listItemPaddingY: listItemPaddingY ?? this.listItemPaddingY,
+      listItemGap: listItemGap ?? this.listItemGap,
+      documentColumnWidth: documentColumnWidth ?? this.documentColumnWidth,
+      borderWidth: borderWidth ?? this.borderWidth,
+      cursorWidth: cursorWidth ?? this.cursorWidth,
+      iconSize: iconSize ?? this.iconSize,
+      smallIconSize: smallIconSize ?? this.smallIconSize,
+      chipIconSize: chipIconSize ?? this.chipIconSize,
+      iconStrokeWidth: iconStrokeWidth ?? this.iconStrokeWidth,
+      focusRingWidth: focusRingWidth ?? this.focusRingWidth,
+      popupShadowBlur: popupShadowBlur ?? this.popupShadowBlur,
+      popupShadowOffsetY: popupShadowOffsetY ?? this.popupShadowOffsetY,
+      modalBarrierOpacity: modalBarrierOpacity ?? this.modalBarrierOpacity,
+      dimmedChromeOpacity: dimmedChromeOpacity ?? this.dimmedChromeOpacity,
+      separatorOpacity: separatorOpacity ?? this.separatorOpacity,
+      paletteWidth: paletteWidth ?? this.paletteWidth,
+      paletteMaxHeight: paletteMaxHeight ?? this.paletteMaxHeight,
+      dialogWidth: dialogWidth ?? this.dialogWidth,
+      dialogEnterScale: dialogEnterScale ?? this.dialogEnterScale,
+    );
+  }
+
   static MaunaMetrics lerp(MaunaMetrics a, MaunaMetrics b, double t) {
     return MaunaMetrics(
       toolbarHeight: lerpDouble(a.toolbarHeight, b.toolbarHeight, t)!,
