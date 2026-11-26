@@ -353,7 +353,11 @@ void main() {
               context: context,
               builder: (BuildContext context) => MaunaCommandPalette(
                 commands: <MaunaCommand>[
-                  MaunaCommand(label: 'Save', onSelected: () => ran = 'save'),
+                  MaunaCommand(
+                    label: 'Save',
+                    shortcut: 'Ctrl+S',
+                    onSelected: () => ran = 'save',
+                  ),
                   MaunaCommand(label: 'Open', onSelected: () => ran = 'open'),
                 ],
               ),
@@ -366,6 +370,7 @@ void main() {
     await tester.tap(find.text('show'));
     await tester.pumpAndSettle();
     expect(find.text('Enter a command'), findsOneWidget);
+    expect(find.text('Ctrl+S'), findsOneWidget);
 
     await tester.enterText(find.byType(EditableText), 'op');
     await tester.pump();

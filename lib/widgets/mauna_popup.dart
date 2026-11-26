@@ -209,9 +209,15 @@ class MaunaDialog extends StatelessWidget {
 }
 
 class MaunaCommand {
-  const MaunaCommand({required this.label, required this.onSelected});
+  const MaunaCommand({
+    required this.label,
+    required this.onSelected,
+    this.shortcut,
+  });
 
   final String label;
+
+  final String? shortcut;
 
   final VoidCallback onSelected;
 }
@@ -396,6 +402,7 @@ class _MaunaCommandPaletteState extends State<MaunaCommandPalette> {
                               key: i == _highlighted ? _highlightedRow : null,
                               child: _CommandRow(
                                 label: matches[i].label,
+                                shortcut: matches[i].shortcut,
                                 highlighted: i == _highlighted,
                                 onHover: () => _highlight(i),
                                 onTap: () => _run(matches[i]),
@@ -415,12 +422,14 @@ class _MaunaCommandPaletteState extends State<MaunaCommandPalette> {
 class _CommandRow extends StatelessWidget {
   const _CommandRow({
     required this.label,
+    required this.shortcut,
     required this.highlighted,
     required this.onHover,
     required this.onTap,
   });
 
   final String label;
+  final String? shortcut;
   final bool highlighted;
   final VoidCallback onHover;
   final VoidCallback onTap;
@@ -442,11 +451,22 @@ class _CommandRow extends StatelessWidget {
               horizontal: theme.spacing.md,
               vertical: theme.metrics.listItemPaddingY,
             ),
-            child: Text(
-              label,
-              style: theme.uiStyle.copyWith(
-                color: highlighted ? theme.textPrimary : theme.textSecondary,
-              ),
+            child: Row(
+              spacing: theme.spacing.lg,
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    label,
+                    style: theme.uiStyle.copyWith(
+                      color: highlighted
+                          ? theme.textPrimary
+                          : theme.textSecondary,
+                    ),
+                  ),
+                ),
+                if (shortcut case final String keys)
+                  Text(keys, style: theme.captionStyle),
+              ],
             ),
           ),
         ),
