@@ -6,6 +6,7 @@ import '../theme/mauna_theme_data.dart';
 import '../theme/mauna_typography.dart';
 import 'mauna_command_filter.dart';
 import 'mauna_icon.dart';
+import 'mauna_menu.dart';
 import 'mauna_text_controller.dart';
 import 'mauna_toolbar.dart';
 
@@ -20,10 +21,10 @@ class MaunaPopup extends StatelessWidget {
     final BorderRadius radius = BorderRadius.circular(theme.radiusLg);
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: theme.bgChrome,
+        color: theme.bgCard,
         border: Border.all(color: theme.line, width: theme.metrics.borderWidth),
         borderRadius: radius,
-        boxShadow: <BoxShadow>[theme.popupShadow],
+        boxShadow: theme.popupShadows,
       ),
       child: ClipRRect(borderRadius: radius, child: child),
     );
@@ -161,47 +162,58 @@ class MaunaDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final MaunaThemeData theme = MaunaThemeData.of(context);
+    final double side = theme.metrics.toolbarButtonSize + theme.spacing.sm;
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: theme.metrics.dialogWidth),
       child: MaunaPopup(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Container(
-              height: theme.metrics.toolbarHeight,
-              padding: EdgeInsets.only(
-                left: theme.spacing.md,
-                right: theme.spacing.xs,
-              ),
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: theme.line,
-                    width: theme.metrics.borderWidth,
-                  ),
-                ),
-              ),
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: theme.uiStyle.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
+        child: ColoredBox(
+          color: theme.bgChrome,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Container(
+                height: theme.metrics.toolbarHeight,
+                padding: EdgeInsets.symmetric(horizontal: theme.spacing.sm),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: theme.line,
+                      width: theme.metrics.borderWidth,
                     ),
                   ),
-                  MaunaToolbarButton(
-                    icon: MaunaGlyphs.close(),
-                    label: closeLabel,
-                    onPressed: () => _close(context),
-                  ),
-                ],
+                ),
+                child: Row(
+                  children: <Widget>[
+                    SizedBox(width: side),
+                    Expanded(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: theme.uiStyle.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: side,
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: MaunaToolbarButton(
+                          icon: MaunaGlyphs.close(),
+                          label: closeLabel,
+                          onPressed: () => _close(context),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Flexible(child: child),
-          ],
+              Flexible(child: child),
+            ],
+          ),
         ),
       ),
     );
@@ -322,6 +334,11 @@ class _MaunaCommandPaletteState extends State<MaunaCommandPalette> {
     final MaunaThemeData theme = MaunaThemeData.of(context);
     final List<MaunaCommand> matches = _matches;
 
+    final TextStyle queryStyle = theme.uiStyle.copyWith(
+      fontSize: theme.typeScale.heading,
+    );
+    final EdgeInsets inset = EdgeInsets.all(theme.metrics.menuInset);
+
     return MaunaPopup(
       child: SizedBox(
         width: theme.metrics.paletteWidth,
@@ -330,7 +347,10 @@ class _MaunaCommandPaletteState extends State<MaunaCommandPalette> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Container(
-              padding: EdgeInsets.all(theme.spacing.sm),
+              padding: EdgeInsets.symmetric(
+                horizontal: theme.spacing.lg,
+                vertical: theme.spacing.md,
+              ),
               decoration: BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
@@ -339,39 +359,49 @@ class _MaunaCommandPaletteState extends State<MaunaCommandPalette> {
                   ),
                 ),
               ),
-              child: CallbackShortcuts(
-                bindings: <ShortcutActivator, VoidCallback>{
-                  const SingleActivator(LogicalKeyboardKey.arrowDown): () =>
-                      _move(1),
-                  const SingleActivator(LogicalKeyboardKey.arrowUp): () =>
-                      _move(-1),
-                  const SingleActivator(LogicalKeyboardKey.escape): () =>
-                      Navigator.of(context).pop(),
-                },
-                child: Stack(
-                  children: <Widget>[
-                    if (_query.text.isEmpty)
-                      IgnorePointer(
-                        child: Text(
-                          widget.placeholder,
-                          style: theme.uiStyle.copyWith(
-                            color: theme.textSecondary,
+              child: Row(
+                spacing: theme.spacing.md,
+                children: <Widget>[
+                  MaunaIcon(MaunaGlyphs.search(), color: theme.textSecondary),
+                  Expanded(
+                    child: CallbackShortcuts(
+                      bindings: <ShortcutActivator, VoidCallback>{
+                        const SingleActivator(
+                          LogicalKeyboardKey.arrowDown,
+                        ): () =>
+                            _move(1),
+                        const SingleActivator(LogicalKeyboardKey.arrowUp): () =>
+                            _move(-1),
+                        const SingleActivator(LogicalKeyboardKey.escape): () =>
+                            Navigator.of(context).pop(),
+                      },
+                      child: Stack(
+                        children: <Widget>[
+                          if (_query.text.isEmpty)
+                            IgnorePointer(
+                              child: Text(
+                                widget.placeholder,
+                                style: queryStyle.copyWith(
+                                  color: theme.textSecondary,
+                                ),
+                              ),
+                            ),
+                          EditableText(
+                            controller: _query,
+                            focusNode: _focusNode,
+                            autofocus: true,
+                            style: queryStyle,
+                            cursorColor: theme.accent,
+                            backgroundCursorColor: theme.textSecondary,
+                            cursorWidth: theme.metrics.cursorWidth,
+                            selectionColor: theme.selectionColor,
+                            onSubmitted: (String value) => _runHighlighted(),
                           ),
-                        ),
+                        ],
                       ),
-                    EditableText(
-                      controller: _query,
-                      focusNode: _focusNode,
-                      autofocus: true,
-                      style: theme.uiStyle,
-                      cursorColor: theme.accent,
-                      backgroundCursorColor: theme.textSecondary,
-                      cursorWidth: theme.metrics.cursorWidth,
-                      selectionColor: theme.selectionColor,
-                      onSubmitted: (String value) => _runHighlighted(),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
             ConstrainedBox(
@@ -381,8 +411,8 @@ class _MaunaCommandPaletteState extends State<MaunaCommandPalette> {
               child: matches.isEmpty
                   ? Padding(
                       padding: EdgeInsets.symmetric(
-                        horizontal: theme.spacing.md,
-                        vertical: theme.spacing.sm,
+                        horizontal: theme.spacing.lg,
+                        vertical: theme.spacing.md,
                       ),
                       child: Text(
                         widget.emptyLabel,
@@ -391,84 +421,30 @@ class _MaunaCommandPaletteState extends State<MaunaCommandPalette> {
                         ),
                       ),
                     )
-                  : SingleChildScrollView(
-                      controller: _scroll,
-                      padding: EdgeInsets.symmetric(vertical: theme.spacing.xs),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          for (int i = 0; i < matches.length; i++)
-                            KeyedSubtree(
-                              key: i == _highlighted ? _highlightedRow : null,
-                              child: _CommandRow(
-                                label: matches[i].label,
-                                shortcut: matches[i].shortcut,
-                                highlighted: i == _highlighted,
-                                onHover: () => _highlight(i),
-                                onTap: () => _run(matches[i]),
+                  : Padding(
+                      padding: inset,
+                      child: SingleChildScrollView(
+                        controller: _scroll,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            for (int i = 0; i < matches.length; i++)
+                              KeyedSubtree(
+                                key: i == _highlighted ? _highlightedRow : null,
+                                child: MaunaMenuItem(
+                                  label: matches[i].label,
+                                  shortcut: matches[i].shortcut,
+                                  highlighted: i == _highlighted,
+                                  onHover: () => _highlight(i),
+                                  onTap: () => _run(matches[i]),
+                                ),
                               ),
-                            ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CommandRow extends StatelessWidget {
-  const _CommandRow({
-    required this.label,
-    required this.shortcut,
-    required this.highlighted,
-    required this.onHover,
-    required this.onTap,
-  });
-
-  final String label;
-  final String? shortcut;
-  final bool highlighted;
-  final VoidCallback onHover;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final MaunaThemeData theme = MaunaThemeData.of(context);
-    return Semantics(
-      button: true,
-      selected: highlighted,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onHover: (PointerHoverEvent event) => onHover(),
-        child: GestureDetector(
-          onTap: onTap,
-          child: Container(
-            color: highlighted ? theme.bgCanvas : null,
-            padding: EdgeInsets.symmetric(
-              horizontal: theme.spacing.md,
-              vertical: theme.metrics.listItemPaddingY,
-            ),
-            child: Row(
-              spacing: theme.spacing.lg,
-              children: <Widget>[
-                Expanded(
-                  child: Text(
-                    label,
-                    style: theme.uiStyle.copyWith(
-                      color: highlighted
-                          ? theme.textPrimary
-                          : theme.textSecondary,
-                    ),
-                  ),
-                ),
-                if (shortcut case final String keys)
-                  Text(keys, style: theme.captionStyle),
-              ],
-            ),
-          ),
         ),
       ),
     );
