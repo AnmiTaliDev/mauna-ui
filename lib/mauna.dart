@@ -10,6 +10,7 @@ export 'widgets/mauna_document_canvas.dart';
 export 'widgets/mauna_focus_ring.dart';
 export 'widgets/mauna_form.dart';
 export 'widgets/mauna_icon.dart';
+export 'widgets/mauna_menu.dart';
 export 'widgets/mauna_popup.dart';
 export 'widgets/mauna_pressable.dart';
 export 'widgets/mauna_segmented_control.dart';
