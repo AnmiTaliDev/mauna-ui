@@ -202,6 +202,47 @@ void main() {
     expect(selected.style!.color, MaunaLightColors.textOnAccent);
   });
 
+  testWidgets('button, switch and segmented control report input', (
+    WidgetTester tester,
+  ) async {
+    final List<Object> events = <Object>[];
+    await tester.pumpWidget(
+      _app(
+        Column(
+          children: <Widget>[
+            MaunaButton(label: 'Done', onPressed: () => events.add('done')),
+            const MaunaButton(label: 'Off', onPressed: null),
+            MaunaSwitch(label: 'Autosave', value: false, onChanged: events.add),
+            SizedBox(
+              width: 200,
+              child: MaunaSegmentedControl<int>(
+                segments: const <int, String>{1: 'One', 2: 'Two'},
+                selected: 1,
+                onChanged: events.add,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.tap(find.text('Done'));
+    await tester.tap(find.text('Off'));
+    await tester.tap(find.byType(MaunaSwitch));
+    await tester.tap(find.text('Two'));
+    expect(events, <Object>['done', true, 2]);
+  });
+
+  testWidgets('button works from the keyboard', (WidgetTester tester) async {
+    int taps = 0;
+    await tester.pumpWidget(
+      _app(MaunaButton(label: 'Done', onPressed: () => taps++)),
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    expect(taps, 1);
+  });
+
   testWidgets('markup styles titles and hides markers off the caret line', (
     WidgetTester tester,
   ) async {
