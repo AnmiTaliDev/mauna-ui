@@ -170,13 +170,13 @@ void main() {
     expect(picked, 1);
   });
 
-  testWidgets('status bar is 28px', (WidgetTester tester) async {
+  testWidgets('status bar is 26px', (WidgetTester tester) async {
     await tester.pumpWidget(
       _app(const MaunaStatusBar(leading: <String>['Words: 12', 'Page 1'])),
     );
-    expect(tester.getSize(find.byType(MaunaStatusBar)).height, 28);
+    expect(tester.getSize(find.byType(MaunaStatusBar)).height, 26);
     expect(find.text('Words: 12'), findsOneWidget);
-    expect(find.text('|'), findsOneWidget);
+    expect(find.text('|'), findsNothing);
   });
 
   testWidgets('selected text uses textOnAccent', (WidgetTester tester) async {

@@ -24,16 +24,8 @@ class MaunaStatusBar extends StatelessWidget {
       opacity: dimmed ? theme.metrics.dimmedChromeOpacity : 1,
       child: Container(
         height: theme.metrics.statusBarHeight,
-        padding: EdgeInsets.symmetric(horizontal: theme.spacing.md),
-        decoration: BoxDecoration(
-          color: theme.bgChrome,
-          border: Border(
-            top: BorderSide(
-              color: theme.line,
-              width: theme.metrics.borderWidth,
-            ),
-          ),
-        ),
+        padding: EdgeInsets.symmetric(horizontal: theme.spacing.lg),
+        color: theme.bgCanvas,
         child: Row(
           children: <Widget>[
             _StatusGroup(items: leading),
@@ -54,19 +46,10 @@ class _StatusGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final MaunaThemeData theme = MaunaThemeData.of(context);
-    final TextStyle style = theme.captionStyle;
-    final TextStyle separatorStyle = style.copyWith(
-      color: theme.textSecondary.withValues(
-        alpha: theme.metrics.separatorOpacity,
-      ),
-    );
     return Row(
-      spacing: theme.spacing.xs,
+      spacing: theme.spacing.lg,
       children: <Widget>[
-        for (int i = 0; i < items.length; i++) ...<Widget>[
-          if (i > 0) ExcludeSemantics(child: Text('|', style: separatorStyle)),
-          Text(items[i], style: style),
-        ],
+        for (final String item in items) Text(item, style: theme.captionStyle),
       ],
     );
   }
