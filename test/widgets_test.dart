@@ -12,7 +12,7 @@ Widget _app(Widget child) {
 }
 
 void main() {
-  testWidgets('toolbar is 40px and hides in focus mode', (
+  testWidgets('toolbar is 44px and hides in focus mode', (
     WidgetTester tester,
   ) async {
     Widget toolbar(bool hidden) => _app(
@@ -29,7 +29,7 @@ void main() {
     );
 
     await tester.pumpWidget(toolbar(false));
-    expect(tester.getSize(find.byType(MaunaToolbar)).height, 40);
+    expect(tester.getSize(find.byType(MaunaToolbar)).height, 44);
     expect(find.text('Save'), findsOneWidget);
 
     await tester.pumpWidget(toolbar(true));

@@ -3,13 +3,16 @@ import 'package:flutter/widgets.dart';
 import '../theme/mauna_motion.dart';
 import '../theme/mauna_theme_data.dart';
 import '../theme/mauna_typography.dart';
+import 'mauna_focus_ring.dart';
 import 'mauna_icon.dart';
+import 'mauna_pressable.dart';
 
 class MaunaToolbar extends StatelessWidget {
   const MaunaToolbar({
     super.key,
     this.leading = const <Widget>[],
     this.trailing = const <Widget>[],
+    this.center,
     this.hidden = false,
     this.dimmed = false,
   });
@@ -17,6 +20,8 @@ class MaunaToolbar extends StatelessWidget {
   final List<Widget> leading;
 
   final List<Widget> trailing;
+
+  final Widget? center;
 
   final bool hidden;
 
@@ -41,9 +46,9 @@ class MaunaToolbar extends StatelessWidget {
               opacity: dimmed ? theme.metrics.dimmedChromeOpacity : 1,
               child: Container(
                 height: theme.metrics.toolbarHeight,
-                padding: EdgeInsets.symmetric(horizontal: theme.spacing.md),
+                padding: EdgeInsets.symmetric(horizontal: theme.spacing.sm),
                 decoration: BoxDecoration(
-                  color: theme.bgChrome,
+                  color: theme.bgCanvas,
                   border: Border(
                     bottom: BorderSide(
                       color: theme.line,
@@ -52,10 +57,11 @@ class MaunaToolbar extends StatelessWidget {
                   ),
                 ),
                 child: Row(
+                  spacing: theme.spacing.sm,
                   children: <Widget>[
-                    Row(spacing: theme.spacing.xs, children: leading),
-                    const Spacer(),
-                    Row(spacing: theme.spacing.xs, children: trailing),
+                    Row(spacing: theme.metrics.listItemGap, children: leading),
+                    Expanded(child: center ?? const SizedBox.shrink()),
+                    Row(spacing: theme.metrics.listItemGap, children: trailing),
                   ],
                 ),
               ),
@@ -67,7 +73,7 @@ class MaunaToolbar extends StatelessWidget {
   }
 }
 
-class MaunaToolbarButton extends StatefulWidget {
+class MaunaToolbarButton extends StatelessWidget {
   const MaunaToolbarButton({
     super.key,
     this.icon,
@@ -84,100 +90,66 @@ class MaunaToolbarButton extends StatefulWidget {
 
   final bool accent;
 
-  @override
-  State<MaunaToolbarButton> createState() => _MaunaToolbarButtonState();
-}
-
-class _MaunaToolbarButtonState extends State<MaunaToolbarButton> {
-  bool _hovered = false;
-  bool _focused = false;
-
-  void _activate() {
-    widget.onPressed?.call();
-  }
-
-  void _setHovered(bool value) {
-    setState(() => _hovered = value);
-  }
-
-  void _setFocused(bool value) {
-    setState(() => _focused = value);
-  }
-
-  Color _foreground(MaunaThemeData theme, bool enabled, bool highlighted) {
-    if (!enabled) {
+  Color _foreground(MaunaThemeData theme, bool highlighted) {
+    if (onPressed == null) {
       return theme.textSecondary.withValues(
         alpha: theme.metrics.dimmedChromeOpacity,
       );
     }
-    if (highlighted) {
-      return theme.textPrimary;
+    if (accent) {
+      return theme.accent;
     }
-    return widget.accent ? theme.accent : theme.textSecondary;
+    return icon == null || highlighted
+        ? theme.textPrimary
+        : theme.textSecondary;
   }
 
   @override
   Widget build(BuildContext context) {
     final MaunaThemeData theme = MaunaThemeData.of(context);
-    final bool enabled = widget.onPressed != null;
-    final bool highlighted = enabled && (_hovered || _focused);
     final double size = theme.metrics.toolbarButtonSize;
-
+    final Path? glyph = icon;
     return Semantics(
       button: true,
-      enabled: enabled,
-      label: widget.label,
+      enabled: onPressed != null,
+      label: label,
       excludeSemantics: true,
-      child: FocusableActionDetector(
-        enabled: enabled,
-        mouseCursor: enabled
-            ? SystemMouseCursors.click
-            : SystemMouseCursors.basic,
-        onShowHoverHighlight: _setHovered,
-        onShowFocusHighlight: _setFocused,
-        actions: <Type, Action<Intent>>{
-          ActivateIntent: CallbackAction<ActivateIntent>(
-            onInvoke: (ActivateIntent intent) => _activate(),
-          ),
-        },
-        child: GestureDetector(
-          onTap: enabled ? _activate : null,
-          child: AnimatedContainer(
-            duration: theme.motion.fast,
-            curve: MaunaMotion.fastCurve,
-            height: size,
-            constraints: BoxConstraints(minWidth: size),
-            padding: widget.icon == null
-                ? EdgeInsets.symmetric(horizontal: theme.spacing.sm)
-                : EdgeInsets.zero,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: highlighted && widget.icon != null
-                  ? theme.bgCanvas
-                  : theme.bgCanvas.withValues(alpha: 0),
-              borderRadius: BorderRadius.circular(theme.radiusSm),
-            ),
-            child: TweenAnimationBuilder<Color?>(
-              tween: ColorTween(end: _foreground(theme, enabled, highlighted)),
+      child: MaunaPressable(
+        onPressed: onPressed,
+        builder: (BuildContext context, bool hovered, bool focused) {
+          final Color color = _foreground(theme, hovered || focused);
+          return MaunaFocusRing(
+            visible: focused,
+            radius: theme.radiusSm,
+            child: AnimatedContainer(
               duration: theme.motion.fast,
               curve: MaunaMotion.fastCurve,
-              builder: (BuildContext context, Color? color, Widget? child) {
-                return widget.icon == null
-                    ? Text(
-                        widget.label,
-                        style: theme.captionStyle.copyWith(color: color),
-                      )
-                    : MaunaIcon(widget.icon!, color: color!);
-              },
+              height: size,
+              constraints: BoxConstraints(minWidth: size),
+              padding: glyph == null
+                  ? EdgeInsets.symmetric(horizontal: theme.spacing.sm)
+                  : EdgeInsets.zero,
+              decoration: BoxDecoration(
+                color: hovered || focused
+                    ? theme.fill
+                    : theme.fill.withValues(alpha: 0),
+                borderRadius: BorderRadius.circular(theme.radiusSm),
+              ),
+              child: Center(
+                widthFactor: 1,
+                child: glyph == null
+                    ? Text(label, style: theme.uiStyle.copyWith(color: color))
+                    : MaunaIcon(glyph, color: color),
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
 }
 
-class MaunaToolbarRestoreButton extends StatefulWidget {
+class MaunaToolbarRestoreButton extends StatelessWidget {
   const MaunaToolbarRestoreButton({
     super.key,
     required this.onPressed,
@@ -189,155 +161,42 @@ class MaunaToolbarRestoreButton extends StatefulWidget {
   final String label;
 
   @override
-  State<MaunaToolbarRestoreButton> createState() =>
-      _MaunaToolbarRestoreButtonState();
-}
-
-class _MaunaToolbarRestoreButtonState extends State<MaunaToolbarRestoreButton> {
-  bool _highlighted = false;
-
-  void _setHighlighted(bool value) {
-    setState(() => _highlighted = value);
-  }
-
-  @override
   Widget build(BuildContext context) {
     final MaunaThemeData theme = MaunaThemeData.of(context);
     final double size = theme.metrics.restoreButtonSize;
     return Semantics(
       button: true,
-      label: widget.label,
+      label: label,
       excludeSemantics: true,
-      child: FocusableActionDetector(
-        mouseCursor: SystemMouseCursors.click,
-        onShowHoverHighlight: _setHighlighted,
-        onShowFocusHighlight: _setHighlighted,
-        actions: <Type, Action<Intent>>{
-          ActivateIntent: CallbackAction<ActivateIntent>(
-            onInvoke: (ActivateIntent intent) => widget.onPressed(),
-          ),
+      child: MaunaPressable(
+        onPressed: onPressed,
+        builder: (BuildContext context, bool hovered, bool focused) {
+          return MaunaFocusRing(
+            visible: focused,
+            radius: theme.radiusSm,
+            child: Container(
+              width: size,
+              height: size,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: theme.bgCard,
+                border: Border.all(
+                  color: theme.line,
+                  width: theme.metrics.borderWidth,
+                ),
+                borderRadius: BorderRadius.circular(theme.radiusSm),
+                boxShadow: theme.controlShadows,
+              ),
+              child: MaunaIcon(
+                MaunaGlyphs.chevronDown(),
+                color: hovered || focused
+                    ? theme.textPrimary
+                    : theme.textSecondary,
+                size: theme.metrics.smallIconSize,
+              ),
+            ),
+          );
         },
-        child: GestureDetector(
-          onTap: widget.onPressed,
-          child: Container(
-            width: size,
-            height: size,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: theme.bgChrome,
-              border: Border.all(
-                color: theme.line,
-                width: theme.metrics.borderWidth,
-              ),
-              borderRadius: BorderRadius.circular(theme.radiusSm),
-            ),
-            child: TweenAnimationBuilder<Color?>(
-              tween: ColorTween(
-                end: _highlighted ? theme.textPrimary : theme.textSecondary,
-              ),
-              duration: theme.motion.fast,
-              curve: MaunaMotion.fastCurve,
-              builder: (BuildContext context, Color? color, Widget? child) {
-                return MaunaIcon(
-                  MaunaGlyphs.chevronDown(),
-                  color: color!,
-                  size: theme.metrics.smallIconSize,
-                );
-              },
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class MaunaToolbarChip extends StatefulWidget {
-  const MaunaToolbarChip({
-    super.key,
-    this.icon,
-    required this.label,
-    required this.onPressed,
-  });
-
-  final Path? icon;
-
-  final String label;
-
-  final VoidCallback onPressed;
-
-  @override
-  State<MaunaToolbarChip> createState() => _MaunaToolbarChipState();
-}
-
-class _MaunaToolbarChipState extends State<MaunaToolbarChip> {
-  bool _highlighted = false;
-
-  void _setHighlighted(bool value) {
-    setState(() => _highlighted = value);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final MaunaThemeData theme = MaunaThemeData.of(context);
-    final Path? icon = widget.icon;
-    return Semantics(
-      button: true,
-      label: widget.label,
-      excludeSemantics: true,
-      child: FocusableActionDetector(
-        mouseCursor: SystemMouseCursors.click,
-        onShowHoverHighlight: _setHighlighted,
-        onShowFocusHighlight: _setHighlighted,
-        actions: <Type, Action<Intent>>{
-          ActivateIntent: CallbackAction<ActivateIntent>(
-            onInvoke: (ActivateIntent intent) => widget.onPressed(),
-          ),
-        },
-        child: GestureDetector(
-          onTap: widget.onPressed,
-          child: AnimatedContainer(
-            duration: theme.motion.fast,
-            curve: MaunaMotion.fastCurve,
-            padding: EdgeInsets.symmetric(
-              horizontal: theme.spacing.sm,
-              vertical: theme.spacing.xs,
-            ),
-            decoration: BoxDecoration(
-              color: theme.bgCanvas,
-              border: Border.all(
-                color: _highlighted ? theme.accent : theme.line,
-                width: theme.metrics.borderWidth,
-              ),
-              borderRadius: BorderRadius.circular(theme.radiusSm),
-            ),
-            child: TweenAnimationBuilder<Color?>(
-              tween: ColorTween(
-                end: _highlighted ? theme.textPrimary : theme.textSecondary,
-              ),
-              duration: theme.motion.fast,
-              curve: MaunaMotion.fastCurve,
-              builder: (BuildContext context, Color? color, Widget? child) {
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: theme.spacing.xs,
-                  children: <Widget>[
-                    if (icon != null)
-                      MaunaIcon(
-                        icon,
-                        color: color!,
-                        size: theme.metrics.chipIconSize,
-                      ),
-                    Text(
-                      widget.label,
-                      style: theme.captionStyle.copyWith(color: color),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-        ),
       ),
     );
   }
