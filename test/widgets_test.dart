@@ -307,6 +307,40 @@ void main() {
     expect(inList('Command 39'), isTrue);
   });
 
+  testWidgets('command palette ranks fuzzy matches', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(
+        Center(
+          child: MaunaCommandPalette(
+            commands: <MaunaCommand>[
+              for (final String label in <String>[
+                'Export to PDF',
+                'Open settings',
+                'Open',
+                'Reopen',
+              ])
+                MaunaCommand(label: label, onSelected: () {}),
+            ],
+          ),
+        ),
+      ),
+    );
+    double top(String label) => tester.getTopLeft(find.text(label)).dy;
+
+    await tester.enterText(find.byType(EditableText), 'open');
+    await tester.pump();
+    expect(top('Open settings'), lessThan(top('Open')));
+    expect(top('Open'), lessThan(top('Reopen')));
+    expect(find.text('Export to PDF'), findsNothing);
+
+    await tester.enterText(find.byType(EditableText), 'exp pdf');
+    await tester.pump();
+    expect(find.text('Export to PDF'), findsOneWidget);
+    expect(find.text('Open'), findsNothing);
+  });
+
   testWidgets('command palette filters and runs a command', (
     WidgetTester tester,
   ) async {

@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import '../theme/mauna_motion.dart';
 import '../theme/mauna_theme_data.dart';
 import '../theme/mauna_typography.dart';
+import 'mauna_command_filter.dart';
 import 'mauna_icon.dart';
 import 'mauna_text_controller.dart';
 import 'mauna_toolbar.dart';
@@ -255,13 +256,8 @@ class _MaunaCommandPaletteState extends State<MaunaCommandPalette> {
     super.dispose();
   }
 
-  List<MaunaCommand> get _matches {
-    final String query = _query.text.toLowerCase();
-    return <MaunaCommand>[
-      for (final MaunaCommand command in widget.commands)
-        if (command.label.toLowerCase().contains(query)) command,
-    ];
-  }
+  List<MaunaCommand> get _matches =>
+      filterCommands(widget.commands, _query.text);
 
   void _onQueryChanged() {
     if (_query.text == _lastQuery) {
