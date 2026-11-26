@@ -236,6 +236,8 @@ class MaunaCommandPalette extends StatefulWidget {
 class _MaunaCommandPaletteState extends State<MaunaCommandPalette> {
   final MaunaTextController _query = MaunaTextController();
   final FocusNode _focusNode = FocusNode();
+  final ScrollController _scroll = ScrollController();
+  final GlobalKey _highlightedRow = GlobalKey();
   int _highlighted = 0;
   String _lastQuery = '';
 
@@ -249,6 +251,7 @@ class _MaunaCommandPaletteState extends State<MaunaCommandPalette> {
   void dispose() {
     _query.dispose();
     _focusNode.dispose();
+    _scroll.dispose();
     super.dispose();
   }
 
@@ -266,6 +269,9 @@ class _MaunaCommandPaletteState extends State<MaunaCommandPalette> {
     }
     _lastQuery = _query.text;
     setState(() => _highlighted = 0);
+    if (_scroll.hasClients) {
+      _scroll.jumpTo(0);
+    }
   }
 
   void _move(int delta) {
@@ -274,6 +280,23 @@ class _MaunaCommandPaletteState extends State<MaunaCommandPalette> {
       return;
     }
     setState(() => _highlighted = (_highlighted + delta) % count);
+    WidgetsBinding.instance.addPostFrameCallback((Duration timeStamp) {
+      _revealHighlighted();
+    });
+  }
+
+  void _revealHighlighted() {
+    final BuildContext? row = _highlightedRow.currentContext;
+    if (row == null) {
+      return;
+    }
+    for (final ScrollPositionAlignmentPolicy policy
+        in <ScrollPositionAlignmentPolicy>[
+          ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+          ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+        ]) {
+      Scrollable.ensureVisible(row, alignmentPolicy: policy);
+    }
   }
 
   void _highlight(int index) {
@@ -366,18 +389,24 @@ class _MaunaCommandPaletteState extends State<MaunaCommandPalette> {
                         ),
                       ),
                     )
-                  : ListView.builder(
-                      shrinkWrap: true,
+                  : SingleChildScrollView(
+                      controller: _scroll,
                       padding: EdgeInsets.symmetric(vertical: theme.spacing.xs),
-                      itemCount: matches.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return _CommandRow(
-                          label: matches[index].label,
-                          highlighted: index == _highlighted,
-                          onHover: () => _highlight(index),
-                          onTap: () => _run(matches[index]),
-                        );
-                      },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          for (int i = 0; i < matches.length; i++)
+                            KeyedSubtree(
+                              key: i == _highlighted ? _highlightedRow : null,
+                              child: _CommandRow(
+                                label: matches[i].label,
+                                highlighted: i == _highlighted,
+                                onHover: () => _highlight(i),
+                                onTap: () => _run(matches[i]),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
             ),
           ],
@@ -408,7 +437,7 @@ class _CommandRow extends StatelessWidget {
       selected: highlighted,
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
-        onEnter: (PointerEnterEvent event) => onHover(),
+        onHover: (PointerHoverEvent event) => onHover(),
         child: GestureDetector(
           onTap: onTap,
           child: Container(

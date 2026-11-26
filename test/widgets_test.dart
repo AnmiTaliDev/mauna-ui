@@ -273,6 +273,40 @@ void main() {
     expect(find.text('Start writing'), findsOneWidget);
   });
 
+  testWidgets('command palette scrolls with the arrow keys', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(
+        Center(
+          child: MaunaCommandPalette(
+            commands: <MaunaCommand>[
+              for (int i = 0; i < 40; i++)
+                MaunaCommand(label: 'Command $i', onSelected: () {}),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final Rect list = tester.getRect(find.byType(SingleChildScrollView));
+    bool inList(String label) =>
+        list.contains(tester.getCenter(find.text(label)));
+
+    for (int i = 0; i < 20; i++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pumpAndSettle();
+    }
+    expect(inList('Command 20'), isTrue);
+    expect(inList('Command 0'), isFalse);
+
+    for (int i = 0; i < 21; i++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pumpAndSettle();
+    }
+    expect(inList('Command 39'), isTrue);
+  });
+
   testWidgets('command palette filters and runs a command', (
     WidgetTester tester,
   ) async {

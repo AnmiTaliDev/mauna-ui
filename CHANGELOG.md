@@ -1,3 +1,7 @@
+## Unreleased
+
+- Command palette: the list scrolls to the row chosen with the arrow keys.
+
 ## 0.1.0
 
 - First release: `MaunaThemeData` with light, dark, sepia and midnight presets, JSON serialization and WCAG AA checks.
