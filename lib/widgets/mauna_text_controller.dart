@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/widgets.dart';
 
 import '../theme/mauna_theme_data.dart';
@@ -53,7 +51,10 @@ class MaunaTextController extends TextEditingController {
         : <_Segment>[_Segment(0, text.length, base)];
     return TextSpan(
       style: base,
-      children: _applySelection(segments, theme.textOnAccent),
+      children: <TextSpan>[
+        for (final _Segment segment in segments)
+          _span(segment.start, segment.end, segment.style),
+      ],
     );
   }
 
@@ -136,7 +137,7 @@ class MaunaTextController extends TextEditingController {
               fontFamily: theme.fontDoc,
               fontFamilyFallback: MaunaFonts.docFallback,
               fontSize: lineStyle.fontSize! * theme.typeScale.inlineCodeScale,
-              backgroundColor: theme.bgChrome,
+              backgroundColor: theme.fill,
             );
       final int innerStart = start + match.start + markerLength;
       final int innerEnd = start + match.end - markerLength;
@@ -149,30 +150,6 @@ class MaunaTextController extends TextEditingController {
     if (cursor < content.length) {
       segments.add(_Segment(start + cursor, end, lineStyle));
     }
-  }
-
-  List<TextSpan> _applySelection(List<_Segment> segments, Color selected) {
-    final TextSelection selection = value.selection;
-    final bool hasSelection = selection.isValid && !selection.isCollapsed;
-    final List<TextSpan> spans = <TextSpan>[];
-    for (final _Segment segment in segments) {
-      if (!hasSelection ||
-          segment.end <= selection.start ||
-          segment.start >= selection.end) {
-        spans.add(_span(segment.start, segment.end, segment.style));
-        continue;
-      }
-      final int from = math.max(segment.start, selection.start);
-      final int to = math.min(segment.end, selection.end);
-      if (segment.start < from) {
-        spans.add(_span(segment.start, from, segment.style));
-      }
-      spans.add(_span(from, to, segment.style.copyWith(color: selected)));
-      if (to < segment.end) {
-        spans.add(_span(to, segment.end, segment.style));
-      }
-    }
-    return spans;
   }
 
   TextSpan _span(int start, int end, TextStyle style) {

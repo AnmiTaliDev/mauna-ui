@@ -179,7 +179,7 @@ void main() {
     expect(find.text('|'), findsNothing);
   });
 
-  testWidgets('selected text uses textOnAccent', (WidgetTester tester) async {
+  testWidgets('selected text keeps its own color', (WidgetTester tester) async {
     final MaunaTextController controller = MaunaTextController(text: 'one two');
     addTearDown(controller.dispose);
     controller.selection = const TextSelection(baseOffset: 4, extentOffset: 7);
@@ -197,9 +197,9 @@ void main() {
         ),
       ),
     );
-    final TextSpan selected = span.children![1] as TextSpan;
-    expect(selected.text, 'two');
-    expect(selected.style!.color, MaunaLightColors.textOnAccent);
+    final TextSpan whole = span.children!.single as TextSpan;
+    expect(whole.text, 'one two');
+    expect(whole.style!.color, MaunaLightColors.textPrimary);
   });
 
   testWidgets('button, switch and segmented control report input', (
@@ -292,7 +292,7 @@ void main() {
     expect(child(onTitle, '# ').style!.color, theme.textSecondary);
     expect(child(offTitle, '# ').style!.color!.a, 0);
     expect(child(offTitle, 'bold').style!.fontWeight, FontWeight.w700);
-    expect(child(offTitle, 'code').style!.backgroundColor, theme.bgChrome);
+    expect(child(offTitle, 'code').style!.backgroundColor, theme.fill);
     expect(controller.titleLines().single, const TextRange(start: 0, end: 7));
   });
 
