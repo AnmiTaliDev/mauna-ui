@@ -4,7 +4,7 @@ import '../theme/mauna_motion.dart';
 import '../theme/mauna_theme_data.dart';
 import '../theme/mauna_typography.dart';
 
-class MaunaSidebar extends StatelessWidget {
+class MaunaSidebar extends StatefulWidget {
   const MaunaSidebar({
     super.key,
     required this.items,
@@ -31,21 +31,58 @@ class MaunaSidebar extends StatelessWidget {
   final bool dimmed;
 
   @override
+  State<MaunaSidebar> createState() => _MaunaSidebarState();
+}
+
+class _MaunaSidebarState extends State<MaunaSidebar> {
+  final GlobalKey _selectedItem = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleReveal();
+  }
+
+  @override
+  void didUpdateWidget(MaunaSidebar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedIndex != widget.selectedIndex) {
+      _scheduleReveal();
+    }
+  }
+
+  void _scheduleReveal() {
+    WidgetsBinding.instance.addPostFrameCallback((Duration timeStamp) {
+      final BuildContext? item = _selectedItem.currentContext;
+      if (item == null) {
+        return;
+      }
+      for (final ScrollPositionAlignmentPolicy policy
+          in <ScrollPositionAlignmentPolicy>[
+            ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+            ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+          ]) {
+        Scrollable.ensureVisible(item, alignmentPolicy: policy);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final MaunaThemeData theme = MaunaThemeData.of(context);
-    final String? title = this.title;
+    final String? title = widget.title;
     return ClipRect(
       child: AnimatedAlign(
         alignment: Alignment.centerRight,
-        widthFactor: collapsed ? 0 : 1,
+        widthFactor: widget.collapsed ? 0 : 1,
         duration: theme.motion.base,
         curve: MaunaMotion.baseCurve,
         child: ExcludeFocus(
-          excluding: collapsed,
+          excluding: widget.collapsed,
           child: Opacity(
-            opacity: dimmed ? theme.metrics.dimmedChromeOpacity : 1,
+            opacity: widget.dimmed ? theme.metrics.dimmedChromeOpacity : 1,
             child: Container(
-              width: width ?? theme.metrics.sidebarWidth,
+              width: widget.width ?? theme.metrics.sidebarWidth,
               decoration: BoxDecoration(
                 color: theme.bgChrome,
                 border: Border(
@@ -74,22 +111,29 @@ class MaunaSidebar extends StatelessWidget {
                       ),
                     ),
                   Expanded(
-                    child: ListView.separated(
+                    child: SingleChildScrollView(
                       padding: EdgeInsets.symmetric(
                         vertical: title == null
                             ? theme.spacing.sm
                             : theme.spacing.xs,
                       ),
-                      itemCount: items.length,
-                      separatorBuilder: (BuildContext context, int index) =>
-                          SizedBox(height: theme.metrics.listItemGap),
-                      itemBuilder: (BuildContext context, int index) {
-                        return _SidebarItem(
-                          title: items[index],
-                          selected: index == selectedIndex,
-                          onTap: () => onSelected(index),
-                        );
-                      },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        spacing: theme.metrics.listItemGap,
+                        children: <Widget>[
+                          for (int i = 0; i < widget.items.length; i++)
+                            KeyedSubtree(
+                              key: i == widget.selectedIndex
+                                  ? _selectedItem
+                                  : null,
+                              child: _SidebarItem(
+                                title: widget.items[i],
+                                selected: i == widget.selectedIndex,
+                                onTap: () => widget.onSelected(i),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
                 ],

@@ -83,6 +83,31 @@ void main() {
     expect(tester.getSize(find.byType(MaunaSidebar)).width, 0);
   });
 
+  testWidgets('sidebar scrolls to the selected item', (
+    WidgetTester tester,
+  ) async {
+    Widget sidebar(int selected) => _app(
+      Row(
+        children: <Widget>[
+          MaunaSidebar(
+            items: <String>[for (int i = 0; i < 80; i++) 'Scene $i'],
+            selectedIndex: selected,
+            onSelected: (int index) {},
+          ),
+        ],
+      ),
+    );
+    final Rect screen = const Rect.fromLTWH(0, 0, 800, 600);
+
+    await tester.pumpWidget(sidebar(0));
+    await tester.pumpAndSettle();
+    expect(screen.contains(tester.getCenter(find.text('Scene 70'))), isFalse);
+
+    await tester.pumpWidget(sidebar(70));
+    await tester.pumpAndSettle();
+    expect(screen.contains(tester.getCenter(find.text('Scene 70'))), isTrue);
+  });
+
   testWidgets('sidebar items work from the keyboard', (
     WidgetTester tester,
   ) async {
