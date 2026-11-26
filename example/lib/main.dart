@@ -30,7 +30,7 @@ class _MaunaDemoAppState extends State<MaunaDemoApp> {
   );
 
   MaunaThemeData _lightTheme() {
-    final Color accent = _settings.accent.value.light;
+    final MaunaAccent accent = _settings.accent.value;
     if (_settings.preset == DemoPreset.sepia) {
       return MaunaThemeData.sepia(accent: accent);
     }
@@ -38,7 +38,7 @@ class _MaunaDemoAppState extends State<MaunaDemoApp> {
   }
 
   MaunaThemeData _darkTheme() {
-    final Color accent = _settings.accent.value.dark;
+    final MaunaAccent accent = _settings.accent.value;
     if (_settings.preset == DemoPreset.midnight) {
       return MaunaThemeData.midnight(accent: accent);
     }
@@ -296,7 +296,7 @@ class _EditorScreenState extends State<EditorScreen> {
                         label: 'Enter focus mode',
                         onPressed: _toggleFocusMode,
                       ),
-                      MaunaToolbarChip(
+                      MaunaToolbarButton(
                         icon: MaunaGlyphs.settings(),
                         label: 'Settings',
                         onPressed: _openSettings,

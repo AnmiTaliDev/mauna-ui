@@ -18,7 +18,13 @@ class DemoAccent {
 
   DemoAccent.custom(Color color)
     : name = customName,
-      value = MaunaAccent(light: color, dark: color);
+      value = MaunaAccent(
+        light: color,
+        dark: color,
+        fill: meetsWcagAa(MaunaLightColors.textOnAccent, color)
+            ? color
+            : MaunaAccents.steelBlue.fill,
+      );
 
   static const String customName = 'Custom';
 
