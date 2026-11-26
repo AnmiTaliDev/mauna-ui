@@ -77,7 +77,7 @@ void main() {
     );
 
     await tester.pumpWidget(sidebar(false));
-    expect(tester.getSize(find.byType(MaunaSidebar)).width, 200);
+    expect(tester.getSize(find.byType(MaunaSidebar)).width, 220);
 
     await tester.pumpWidget(sidebar(true));
     await tester.pumpAndSettle();

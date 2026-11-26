@@ -3,7 +3,9 @@ import 'package:flutter/widgets.dart';
 import '../theme/mauna_motion.dart';
 import '../theme/mauna_theme_data.dart';
 import '../theme/mauna_typography.dart';
+import 'mauna_focus_ring.dart';
 import 'mauna_popup.dart';
+import 'mauna_pressable.dart';
 
 class MaunaSidebar extends StatefulWidget {
   const MaunaSidebar({
@@ -129,13 +131,13 @@ class _MaunaSidebarState extends State<MaunaSidebar> {
                   if (title != null)
                     Padding(
                       padding: EdgeInsets.fromLTRB(
-                        theme.spacing.md,
+                        theme.spacing.lg,
                         theme.spacing.md,
                         theme.spacing.md,
                         theme.spacing.xs,
                       ),
                       child: Text(
-                        title.toUpperCase(),
+                        title,
                         style: theme.labelStyle,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -144,6 +146,7 @@ class _MaunaSidebarState extends State<MaunaSidebar> {
                   Expanded(
                     child: SingleChildScrollView(
                       padding: EdgeInsets.symmetric(
+                        horizontal: theme.spacing.sm,
                         vertical: title == null
                             ? theme.spacing.sm
                             : theme.spacing.xs,
@@ -252,7 +255,7 @@ class _ReorderableItem extends StatelessWidget {
   }
 }
 
-class _SidebarItem extends StatefulWidget {
+class _SidebarItem extends StatelessWidget {
   const _SidebarItem({
     required this.title,
     required this.selected,
@@ -264,65 +267,39 @@ class _SidebarItem extends StatefulWidget {
   final VoidCallback onTap;
 
   @override
-  State<_SidebarItem> createState() => _SidebarItemState();
-}
-
-class _SidebarItemState extends State<_SidebarItem> {
-  bool _hovered = false;
-  bool _focused = false;
-
-  void _setHovered(bool value) {
-    setState(() => _hovered = value);
-  }
-
-  void _setFocused(bool value) {
-    setState(() => _focused = value);
-  }
-
-  @override
   Widget build(BuildContext context) {
     final MaunaThemeData theme = MaunaThemeData.of(context);
-    final bool strong = widget.selected || _hovered || _focused;
-    final TextStyle style = theme.uiStyle.copyWith(
-      color: strong ? theme.textPrimary : theme.textSecondary,
-      fontWeight: widget.selected ? FontWeight.w500 : FontWeight.w400,
-    );
     return Semantics(
       button: true,
-      selected: widget.selected,
-      child: FocusableActionDetector(
-        mouseCursor: SystemMouseCursors.click,
-        onShowHoverHighlight: _setHovered,
-        onShowFocusHighlight: _setFocused,
-        actions: <Type, Action<Intent>>{
-          ActivateIntent: CallbackAction<ActivateIntent>(
-            onInvoke: (ActivateIntent intent) => widget.onTap(),
-          ),
+      selected: selected,
+      child: MaunaPressable(
+        onPressed: onTap,
+        builder: (BuildContext context, bool hovered, bool focused) {
+          return MaunaFocusRing(
+            visible: focused,
+            radius: theme.radiusSm,
+            child: Container(
+              constraints: BoxConstraints(minHeight: theme.metrics.rowHeight),
+              padding: EdgeInsets.symmetric(
+                horizontal: theme.spacing.sm,
+                vertical: theme.metrics.listItemPaddingY,
+              ),
+              decoration: BoxDecoration(
+                color: selected ? theme.fill : null,
+                borderRadius: BorderRadius.circular(theme.radiusSm),
+              ),
+              alignment: Alignment.centerLeft,
+              child: Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.uiStyle.copyWith(
+                  fontWeight: selected ? FontWeight.w500 : FontWeight.w400,
+                ),
+              ),
+            ),
+          );
         },
-        child: GestureDetector(
-          onTap: widget.onTap,
-          child: Container(
-            color: widget.selected ? theme.bgCanvas : null,
-            foregroundDecoration: _focused
-                ? BoxDecoration(
-                    border: Border.all(
-                      color: theme.textSecondary,
-                      width: theme.metrics.focusRingWidth,
-                    ),
-                  )
-                : null,
-            padding: EdgeInsets.symmetric(
-              horizontal: theme.spacing.md,
-              vertical: theme.metrics.listItemPaddingY,
-            ),
-            child: AnimatedDefaultTextStyle(
-              style: style,
-              duration: theme.motion.fast,
-              curve: MaunaMotion.fastCurve,
-              child: Text(widget.title),
-            ),
-          ),
-        ),
       ),
     );
   }
