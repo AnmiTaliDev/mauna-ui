@@ -1,8 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../theme/mauna_theme_data.dart';
-import '../theme/mauna_typography.dart';
-import 'mauna_popup.dart';
+import 'mauna_menu.dart';
 
 class MaunaContextMenuLabels {
   const MaunaContextMenuLabels({
@@ -31,9 +30,7 @@ class MaunaContextMenuLabels {
   }
 }
 
-const double _menuWidth = 200;
-
-class MaunaContextMenu extends StatelessWidget {
+class MaunaContextMenu extends StatefulWidget {
   const MaunaContextMenu({
     super.key,
     required this.anchor,
@@ -48,71 +45,38 @@ class MaunaContextMenu extends StatelessWidget {
   final MaunaContextMenuLabels labels;
 
   @override
+  State<MaunaContextMenu> createState() => _MaunaContextMenuState();
+}
+
+class _MaunaContextMenuState extends State<MaunaContextMenu> {
+  ContextMenuButtonType? _hovered;
+
+  void _setHovered(ContextMenuButtonType? type) {
+    setState(() => _hovered = type);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final MaunaThemeData theme = MaunaThemeData.of(context);
     return CustomSingleChildLayout(
-      delegate: DesktopTextSelectionToolbarLayoutDelegate(anchor: anchor),
+      delegate: DesktopTextSelectionToolbarLayoutDelegate(
+        anchor: widget.anchor,
+      ),
       child: TextFieldTapRegion(
         child: SizedBox(
-          width: _menuWidth,
-          child: MaunaPopup(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: theme.spacing.xs),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  for (final ContextMenuButtonItem item in items)
-                    if (labels.of(item.type) case final String label)
-                      _ContextMenuRow(label: label, onTap: item.onPressed),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ContextMenuRow extends StatefulWidget {
-  const _ContextMenuRow({required this.label, required this.onTap});
-
-  final String label;
-
-  final VoidCallback? onTap;
-
-  @override
-  State<_ContextMenuRow> createState() => _ContextMenuRowState();
-}
-
-class _ContextMenuRowState extends State<_ContextMenuRow> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final MaunaThemeData theme = MaunaThemeData.of(context);
-    return Semantics(
-      button: true,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: widget.onTap,
-          child: Container(
-            color: _hovered ? theme.bgCanvas : null,
-            padding: EdgeInsets.symmetric(
-              horizontal: theme.spacing.md,
-              vertical: theme.metrics.listItemPaddingY,
-            ),
-            child: Text(
-              widget.label,
-              style: theme.uiStyle.copyWith(
-                color: _hovered ? theme.textPrimary : theme.textSecondary,
-              ),
-            ),
+          width: theme.metrics.menuWidth,
+          child: MaunaMenu(
+            children: <Widget>[
+              for (final ContextMenuButtonItem item in widget.items)
+                if (widget.labels.of(item.type) case final String label)
+                  MaunaMenuItem(
+                    label: label,
+                    highlighted: _hovered == item.type,
+                    onHover: () => _setHovered(item.type),
+                    onExit: () => _setHovered(null),
+                    onTap: item.onPressed,
+                  ),
+            ],
           ),
         ),
       ),
