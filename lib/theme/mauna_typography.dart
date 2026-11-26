@@ -18,13 +18,13 @@ class MaunaTypeScale {
   });
 
   static const MaunaTypeScale standard = MaunaTypeScale(
-    caption: 12,
-    ui: 14,
+    caption: 11,
+    ui: 13,
     doc: 16,
-    heading: 20,
-    title: 28,
+    heading: 17,
+    title: 26,
     lineHeightTitle: 1.25,
-    labelLetterSpacing: 0.5,
+    labelLetterSpacing: 0,
     inlineCodeScale: 0.9,
   );
 
@@ -128,7 +128,7 @@ extension MaunaTextStyles on MaunaThemeData {
     fontFamilyFallback: MaunaFonts.uiFallback,
     fontSize: typeScale.caption,
     height: lineHeightUi,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w600,
     letterSpacing: typeScale.labelLetterSpacing,
     color: textSecondary,
   );

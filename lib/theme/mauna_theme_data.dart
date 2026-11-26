@@ -14,10 +14,14 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
     required this.brightness,
     required this.bgCanvas,
     required this.bgChrome,
+    required this.bgCard,
+    required this.bgControl,
     required this.textPrimary,
     required this.textSecondary,
     required this.line,
+    required this.fill,
     required this.accent,
+    required this.accentFill,
     required this.textOnAccent,
     required this.fontDoc,
     required this.fontUi,
@@ -47,19 +51,39 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
          'text.secondary on bg.chrome is below WCAG AA 4.5:1',
        ),
        assert(
+         meetsWcagAa(textPrimary, bgCard),
+         'text.primary on bg.card is below WCAG AA 4.5:1',
+       ),
+       assert(
+         meetsWcagAa(textSecondary, bgCard),
+         'text.secondary on bg.card is below WCAG AA 4.5:1',
+       ),
+       assert(
+         meetsWcagAa(textPrimary, bgControl),
+         'text.primary on bg.control is below WCAG AA 4.5:1',
+       ),
+       assert(
+         meetsWcagAa(textOnAccent, accentFill),
+         'text.on_accent on accent.fill is below WCAG AA 4.5:1',
+       ),
+       assert(
          radiusSm <= maxRadius && radiusLg <= maxRadius,
-         'Radii above 8px are not used in Mauna',
+         'Radii above 10px are not used in Mauna',
        );
 
-  factory MaunaThemeData.light({Color accent = MaunaLightColors.accent}) {
+  factory MaunaThemeData.light({MaunaAccent accent = MaunaAccents.steelBlue}) {
     return MaunaThemeData(
       brightness: Brightness.light,
       bgCanvas: MaunaLightColors.bgCanvas,
       bgChrome: MaunaLightColors.bgChrome,
+      bgCard: MaunaLightColors.bgCard,
+      bgControl: MaunaLightColors.bgControl,
       textPrimary: MaunaLightColors.textPrimary,
       textSecondary: MaunaLightColors.textSecondary,
       line: MaunaLightColors.line,
-      accent: accent,
+      fill: MaunaLightColors.fill,
+      accent: accent.light,
+      accentFill: accent.fill,
       textOnAccent: MaunaLightColors.textOnAccent,
       fontDoc: MaunaFonts.courierPrime,
       fontUi: MaunaFonts.inter,
@@ -71,15 +95,19 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
     );
   }
 
-  factory MaunaThemeData.dark({Color accent = MaunaDarkColors.accent}) {
+  factory MaunaThemeData.dark({MaunaAccent accent = MaunaAccents.steelBlue}) {
     return MaunaThemeData(
       brightness: Brightness.dark,
       bgCanvas: MaunaDarkColors.bgCanvas,
       bgChrome: MaunaDarkColors.bgChrome,
+      bgCard: MaunaDarkColors.bgCard,
+      bgControl: MaunaDarkColors.bgControl,
       textPrimary: MaunaDarkColors.textPrimary,
       textSecondary: MaunaDarkColors.textSecondary,
       line: MaunaDarkColors.line,
-      accent: accent,
+      fill: MaunaDarkColors.fill,
+      accent: accent.dark,
+      accentFill: accent.fill,
       textOnAccent: MaunaDarkColors.textOnAccent,
       fontDoc: MaunaFonts.courierPrime,
       fontUi: MaunaFonts.inter,
@@ -91,15 +119,19 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
     );
   }
 
-  factory MaunaThemeData.sepia({Color accent = MaunaSepiaColors.accent}) {
+  factory MaunaThemeData.sepia({MaunaAccent accent = MaunaAccents.steelBlue}) {
     return MaunaThemeData(
       brightness: Brightness.light,
       bgCanvas: MaunaSepiaColors.bgCanvas,
       bgChrome: MaunaSepiaColors.bgChrome,
+      bgCard: MaunaSepiaColors.bgCard,
+      bgControl: MaunaSepiaColors.bgControl,
       textPrimary: MaunaSepiaColors.textPrimary,
       textSecondary: MaunaSepiaColors.textSecondary,
       line: MaunaSepiaColors.line,
-      accent: accent,
+      fill: MaunaSepiaColors.fill,
+      accent: accent.light,
+      accentFill: accent.fill,
       textOnAccent: MaunaSepiaColors.textOnAccent,
       fontDoc: MaunaFonts.courierPrime,
       fontUi: MaunaFonts.inter,
@@ -111,15 +143,21 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
     );
   }
 
-  factory MaunaThemeData.midnight({Color accent = MaunaMidnightColors.accent}) {
+  factory MaunaThemeData.midnight({
+    MaunaAccent accent = MaunaAccents.steelBlue,
+  }) {
     return MaunaThemeData(
       brightness: Brightness.dark,
       bgCanvas: MaunaMidnightColors.bgCanvas,
       bgChrome: MaunaMidnightColors.bgChrome,
+      bgCard: MaunaMidnightColors.bgCard,
+      bgControl: MaunaMidnightColors.bgControl,
       textPrimary: MaunaMidnightColors.textPrimary,
       textSecondary: MaunaMidnightColors.textSecondary,
       line: MaunaMidnightColors.line,
-      accent: accent,
+      fill: MaunaMidnightColors.fill,
+      accent: accent.dark,
+      accentFill: accent.fill,
       textOnAccent: MaunaMidnightColors.textOnAccent,
       fontDoc: MaunaFonts.courierPrime,
       fontUi: MaunaFonts.inter,
@@ -136,10 +174,14 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
       brightness: Brightness.values.byName(json['brightness']! as String),
       bgCanvas: _colorFromHex(json['bg_canvas']! as String),
       bgChrome: _colorFromHex(json['bg_chrome']! as String),
+      bgCard: _colorFromHex(json['bg_card']! as String),
+      bgControl: _colorFromHex(json['bg_control']! as String),
       textPrimary: _colorFromHex(json['text_primary']! as String),
       textSecondary: _colorFromHex(json['text_secondary']! as String),
       line: _colorFromHex(json['line']! as String),
+      fill: _colorFromHex(json['fill']! as String),
       accent: _colorFromHex(json['accent']! as String),
+      accentFill: _colorFromHex(json['accent_fill']! as String),
       textOnAccent: _colorFromHex(json['text_on_accent']! as String),
       fontDoc: json['font_doc']! as String,
       fontUi: json['font_ui']! as String,
@@ -167,13 +209,21 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
 
   final Color bgChrome;
 
+  final Color bgCard;
+
+  final Color bgControl;
+
   final Color textPrimary;
 
   final Color textSecondary;
 
   final Color line;
 
+  final Color fill;
+
   final Color accent;
+
+  final Color accentFill;
 
   final Color textOnAccent;
 
@@ -199,13 +249,32 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
 
   final MaunaMetrics metrics;
 
-  BoxShadow get popupShadow => BoxShadow(
-    color: const Color(0xFF000000).withValues(alpha: popupShadowOpacity),
-    offset: Offset(0, metrics.popupShadowOffsetY),
-    blurRadius: metrics.popupShadowBlur,
-  );
+  List<BoxShadow> get popupShadows => <BoxShadow>[
+    BoxShadow(
+      color: const Color(0xFF000000).withValues(alpha: popupShadowOpacity),
+      offset: Offset(0, metrics.popupShadowOffsetY),
+      blurRadius: metrics.popupShadowBlur,
+    ),
+    BoxShadow(
+      color: const Color(0xFF000000).withValues(alpha: popupShadowOpacity / 2),
+      offset: const Offset(0, 1),
+      blurRadius: 3,
+    ),
+  ];
 
-  Color get selectionColor => accent;
+  List<BoxShadow> get controlShadows => <BoxShadow>[
+    BoxShadow(
+      color: const Color(0xFF000000).withValues(alpha: popupShadowOpacity),
+      offset: const Offset(0, 1),
+      blurRadius: 2,
+    ),
+  ];
+
+  Color get selectionColor =>
+      accent.withValues(alpha: brightness == Brightness.light ? 0.22 : 0.36);
+
+  Color get focusRingColor =>
+      accent.withValues(alpha: metrics.focusRingOpacity);
 
   ThemeData toMaterialTheme() {
     final ColorScheme base = brightness == Brightness.light
@@ -215,7 +284,7 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
       brightness: brightness,
       colorScheme: base.copyWith(
         primary: accent,
-        onPrimary: bgCanvas,
+        onPrimary: textOnAccent,
         secondary: textSecondary,
         onSecondary: bgCanvas,
         surface: bgCanvas,
@@ -242,10 +311,14 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
     Brightness? brightness,
     Color? bgCanvas,
     Color? bgChrome,
+    Color? bgCard,
+    Color? bgControl,
     Color? textPrimary,
     Color? textSecondary,
     Color? line,
+    Color? fill,
     Color? accent,
+    Color? accentFill,
     Color? textOnAccent,
     String? fontDoc,
     String? fontUi,
@@ -263,10 +336,14 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
       brightness: brightness ?? this.brightness,
       bgCanvas: bgCanvas ?? this.bgCanvas,
       bgChrome: bgChrome ?? this.bgChrome,
+      bgCard: bgCard ?? this.bgCard,
+      bgControl: bgControl ?? this.bgControl,
       textPrimary: textPrimary ?? this.textPrimary,
       textSecondary: textSecondary ?? this.textSecondary,
       line: line ?? this.line,
+      fill: fill ?? this.fill,
       accent: accent ?? this.accent,
+      accentFill: accentFill ?? this.accentFill,
       textOnAccent: textOnAccent ?? this.textOnAccent,
       fontDoc: fontDoc ?? this.fontDoc,
       fontUi: fontUi ?? this.fontUi,
@@ -292,10 +369,14 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
       brightness: first ? brightness : other.brightness,
       bgCanvas: Color.lerp(bgCanvas, other.bgCanvas, t)!,
       bgChrome: Color.lerp(bgChrome, other.bgChrome, t)!,
+      bgCard: Color.lerp(bgCard, other.bgCard, t)!,
+      bgControl: Color.lerp(bgControl, other.bgControl, t)!,
       textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
       textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
       line: Color.lerp(line, other.line, t)!,
+      fill: Color.lerp(fill, other.fill, t)!,
       accent: Color.lerp(accent, other.accent, t)!,
+      accentFill: Color.lerp(accentFill, other.accentFill, t)!,
       textOnAccent: Color.lerp(textOnAccent, other.textOnAccent, t)!,
       fontDoc: first ? fontDoc : other.fontDoc,
       fontUi: first ? fontUi : other.fontUi,
@@ -319,10 +400,14 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
     required this.brightness,
     required this.bgCanvas,
     required this.bgChrome,
+    required this.bgCard,
+    required this.bgControl,
     required this.textPrimary,
     required this.textSecondary,
     required this.line,
+    required this.fill,
     required this.accent,
+    required this.accentFill,
     required this.textOnAccent,
     required this.fontDoc,
     required this.fontUi,
@@ -342,10 +427,14 @@ class MaunaThemeData extends ThemeExtension<MaunaThemeData> {
       'brightness': brightness.name,
       'bg_canvas': _colorToHex(bgCanvas),
       'bg_chrome': _colorToHex(bgChrome),
+      'bg_card': _colorToHex(bgCard),
+      'bg_control': _colorToHex(bgControl),
       'text_primary': _colorToHex(textPrimary),
       'text_secondary': _colorToHex(textSecondary),
       'line': _colorToHex(line),
+      'fill': _colorToHex(fill),
       'accent': _colorToHex(accent),
+      'accent_fill': _colorToHex(accentFill),
       'text_on_accent': _colorToHex(textOnAccent),
       'font_doc': fontDoc,
       'font_ui': fontUi,

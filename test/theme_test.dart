@@ -21,29 +21,37 @@ void main() {
     );
   });
 
-  test('every preset and accent pair passes WCAG AA on its backgrounds', () {
-    final List<MaunaThemeData> presets = <MaunaThemeData>[
-      MaunaThemeData.light(),
-      MaunaThemeData.dark(),
-      MaunaThemeData.sepia(),
-      MaunaThemeData.midnight(),
-    ];
+  test('every preset and accent passes WCAG AA', () {
     const List<MaunaAccent> accents = <MaunaAccent>[
       MaunaAccents.steelBlue,
       MaunaAccents.graphite,
       MaunaAccents.coolTeal,
       MaunaAccents.indigo,
     ];
-    for (final MaunaThemeData theme in presets) {
-      expect(meetsWcagAa(theme.textSecondary, theme.bgChrome), isTrue);
-      expect(meetsWcagAa(theme.textOnAccent, theme.accent), isTrue);
-      for (final MaunaAccent accent in accents) {
-        final Color color = theme.brightness == Brightness.light
-            ? accent.light
-            : accent.dark;
-        expect(meetsWcagAa(color, theme.bgCanvas), isTrue);
-        expect(meetsWcagAa(color, theme.bgChrome), isTrue);
-        expect(meetsWcagAa(theme.textOnAccent, color), isTrue);
+    for (final MaunaAccent accent in accents) {
+      for (final MaunaThemeData theme in <MaunaThemeData>[
+        MaunaThemeData.light(accent: accent),
+        MaunaThemeData.dark(accent: accent),
+        MaunaThemeData.sepia(accent: accent),
+        MaunaThemeData.midnight(accent: accent),
+      ]) {
+        for (final Color background in <Color>[
+          theme.bgCanvas,
+          theme.bgChrome,
+          theme.bgCard,
+        ]) {
+          expect(meetsWcagAa(theme.textPrimary, background), isTrue);
+          expect(meetsWcagAa(theme.textSecondary, background), isTrue);
+          expect(meetsWcagAa(theme.accent, background), isTrue);
+        }
+        expect(meetsWcagAa(theme.textOnAccent, theme.accentFill), isTrue);
+        expect(
+          meetsWcagAa(
+            theme.textPrimary,
+            Color.alphaBlend(theme.selectionColor, theme.bgCanvas),
+          ),
+          isTrue,
+        );
       }
     }
   });
@@ -51,14 +59,15 @@ void main() {
   test('presets build with their values', () {
     final MaunaThemeData light = MaunaThemeData.light();
     final MaunaThemeData dark = MaunaThemeData.dark();
-    expect(light.bgCanvas, const Color(0xFFF8FAFC));
-    expect(dark.textSecondary, const Color(0xFF8B94A0));
+    expect(light.bgCanvas, const Color(0xFFFFFFFF));
+    expect(dark.textSecondary, const Color(0xFFA2A2A8));
     expect(light.accent, MaunaAccents.steelBlue.light);
-    expect(dark.popupShadowOpacity, light.popupShadowOpacity / 2);
-    expect(
-      MaunaThemeData.light(accent: MaunaAccents.coolTeal.light).accent,
-      MaunaAccents.coolTeal.light,
+    expect(dark.accent, MaunaAccents.steelBlue.dark);
+    final MaunaThemeData teal = MaunaThemeData.light(
+      accent: MaunaAccents.coolTeal,
     );
+    expect(teal.accent, MaunaAccents.coolTeal.light);
+    expect(teal.accentFill, MaunaAccents.coolTeal.fill);
   });
 
   test('low contrast theme fails the debug assert', () {
@@ -69,20 +78,20 @@ void main() {
     );
   });
 
-  test('radius above 8px fails the debug assert', () {
+  test('radius above 10px fails the debug assert', () {
     expect(
-      () => MaunaThemeData.light().copyWith(radiusLg: 12),
+      () => MaunaThemeData.light().copyWith(radiusLg: 14),
       throwsAssertionError,
     );
   });
 
   test('JSON round trip keeps every field', () {
     final MaunaThemeData source = MaunaThemeData.dark(
-      accent: MaunaAccents.indigo.dark,
+      accent: MaunaAccents.indigo,
     );
     final Map<String, Object?> json = source.toJson();
-    expect(json['accent'], '#7F82D3');
-    expect(json['bg_canvas'], '#15181E');
+    expect(json['accent'], '#A5A2FA');
+    expect(json['bg_canvas'], '#1E1E1F');
     final MaunaThemeData restored = MaunaThemeData.fromJson(json);
     expect(restored.toJson(), json);
   });

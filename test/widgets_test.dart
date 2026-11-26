@@ -58,7 +58,7 @@ void main() {
     await tester.tap(find.text('Save'));
     expect(taps, 1);
     expect(find.byType(MaunaIcon), findsOneWidget);
-    expect(tester.getSize(find.byType(MaunaIcon)), const Size.square(18));
+    expect(tester.getSize(find.byType(MaunaIcon)), const Size.square(16));
     expect(find.text('Find'), findsNothing);
   });
 
