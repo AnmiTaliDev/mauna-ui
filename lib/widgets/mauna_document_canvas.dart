@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 
 import '../theme/mauna_theme_data.dart';
 import '../theme/mauna_typography.dart';
+import 'mauna_context_menu.dart';
 import 'mauna_text_controller.dart';
 
 class MaunaDocumentCanvas extends StatefulWidget {
@@ -18,6 +19,7 @@ class MaunaDocumentCanvas extends StatefulWidget {
     this.focusNode,
     this.placeholder,
     this.autofocus = false,
+    this.contextMenuLabels = const MaunaContextMenuLabels(),
   });
 
   final MaunaTextController controller;
@@ -27,6 +29,8 @@ class MaunaDocumentCanvas extends StatefulWidget {
   final String? placeholder;
 
   final bool autofocus;
+
+  final MaunaContextMenuLabels contextMenuLabels;
 
   @override
   State<MaunaDocumentCanvas> createState() => _MaunaDocumentCanvasState();
@@ -161,6 +165,14 @@ class _MaunaDocumentCanvasState extends State<MaunaDocumentCanvas>
     ];
   }
 
+  Widget _buildContextMenu(BuildContext context, EditableTextState editable) {
+    return MaunaContextMenu(
+      anchor: editable.contextMenuAnchors.primaryAnchor,
+      items: editable.contextMenuButtonItems,
+      labels: widget.contextMenuLabels,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final MaunaThemeData theme = MaunaThemeData.of(context);
@@ -212,6 +224,7 @@ class _MaunaDocumentCanvasState extends State<MaunaDocumentCanvas>
                       keyboardType: TextInputType.multiline,
                       textInputAction: TextInputAction.newline,
                       rendererIgnoresPointer: true,
+                      contextMenuBuilder: _buildContextMenu,
                     ),
                   ),
                   for (final double offset in _ruleOffsets)

@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -313,6 +314,36 @@ void main() {
     expect(caret(), findsNothing);
     await tester.pump(const Duration(milliseconds: 530));
     expect(caret(), findsOneWidget);
+  });
+
+  testWidgets('document canvas opens a context menu on right click', (
+    WidgetTester tester,
+  ) async {
+    final MaunaTextController controller = MaunaTextController(text: 'Text');
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      _app(
+        MaunaDocumentCanvas(
+          controller: controller,
+          autofocus: true,
+          contextMenuLabels: const MaunaContextMenuLabels(selectAll: 'All'),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tapAt(
+      tester.getCenter(find.byType(EditableText)),
+      buttons: kSecondaryButton,
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('All'));
+    await tester.pumpAndSettle();
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 0, extentOffset: 4),
+    );
   });
 
   testWidgets('document column is capped at 620px', (

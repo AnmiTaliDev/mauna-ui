@@ -4,6 +4,7 @@ export 'theme/mauna_spacing.dart';
 export 'theme/mauna_theme_data.dart';
 export 'theme/mauna_theme_presets.dart';
 export 'theme/mauna_typography.dart';
+export 'widgets/mauna_context_menu.dart';
 export 'widgets/mauna_document_canvas.dart';
 export 'widgets/mauna_icon.dart';
 export 'widgets/mauna_popup.dart';

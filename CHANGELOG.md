@@ -5,6 +5,7 @@
 - `MaunaCommand.shortcut`: a key hint shown at the end of the palette row.
 - Sidebar: the list scrolls to the selected item when `selectedIndex` changes.
 - Sidebar: items can be dragged when `onReorder` is set. `canReorder` limits which items can be moved onto each other.
+- Document canvas: a context menu with cut, copy, paste and select all. `contextMenuLabels` sets the item names.
 
 ## 0.1.0
 
