@@ -1,3 +1,7 @@
+## 0.3.1
+
+- Fix: `MaunaTextField` and the command palette query select text with the mouse: drag, double click and triple click.
+
 ## 0.3.0
 
 New look: neutral colors and compact controls in the style of macOS before Liquid Glass. The values no longer match the Mauna HIG.
