@@ -4,7 +4,7 @@ import '../theme/mauna_theme_data.dart';
 import '../theme/mauna_typography.dart';
 import 'mauna_focus_ring.dart';
 
-class MaunaTextField extends StatelessWidget {
+class MaunaTextField extends StatefulWidget {
   const MaunaTextField({
     super.key,
     required this.controller,
@@ -28,11 +28,31 @@ class MaunaTextField extends StatelessWidget {
   final bool autofocus;
 
   @override
+  State<MaunaTextField> createState() => _MaunaTextFieldState();
+}
+
+class _MaunaTextFieldState extends State<MaunaTextField>
+    implements TextSelectionGestureDetectorBuilderDelegate {
+  @override
+  final GlobalKey<EditableTextState> editableTextKey =
+      GlobalKey<EditableTextState>();
+
+  @override
+  bool get forcePressEnabled => false;
+
+  @override
+  bool get selectionEnabled => true;
+
+  late final TextSelectionGestureDetectorBuilder _gestures =
+      TextSelectionGestureDetectorBuilder(delegate: this);
+
+  @override
   Widget build(BuildContext context) {
     final MaunaThemeData theme = MaunaThemeData.of(context);
-    return GestureDetector(
+    final TextEditingController controller = widget.controller;
+    final FocusNode focusNode = widget.focusNode;
+    return _gestures.buildGestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: focusNode.requestFocus,
       child: ListenableBuilder(
         listenable: Listenable.merge(<Listenable>[controller, focusNode]),
         builder: (BuildContext context, Widget? field) {
@@ -56,7 +76,7 @@ class MaunaTextField extends StatelessWidget {
                   if (controller.text.isEmpty)
                     IgnorePointer(
                       child: Text(
-                        placeholder,
+                        widget.placeholder,
                         maxLines: 1,
                         style: theme.uiStyle.copyWith(
                           color: theme.textSecondary,
@@ -70,15 +90,17 @@ class MaunaTextField extends StatelessWidget {
           );
         },
         child: EditableText(
+          key: editableTextKey,
           controller: controller,
           focusNode: focusNode,
-          autofocus: autofocus,
+          autofocus: widget.autofocus,
           style: theme.uiStyle,
           cursorColor: theme.accent,
           backgroundCursorColor: theme.textSecondary,
           selectionColor: theme.selectionColor,
-          onChanged: onChanged,
-          onSubmitted: onSubmitted,
+          onChanged: widget.onChanged,
+          onSubmitted: widget.onSubmitted,
+          rendererIgnoresPointer: true,
         ),
       ),
     );

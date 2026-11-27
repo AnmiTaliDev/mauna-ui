@@ -252,7 +252,21 @@ class MaunaCommandPalette extends StatefulWidget {
   State<MaunaCommandPalette> createState() => _MaunaCommandPaletteState();
 }
 
-class _MaunaCommandPaletteState extends State<MaunaCommandPalette> {
+class _MaunaCommandPaletteState extends State<MaunaCommandPalette>
+    implements TextSelectionGestureDetectorBuilderDelegate {
+  @override
+  final GlobalKey<EditableTextState> editableTextKey =
+      GlobalKey<EditableTextState>();
+
+  @override
+  bool get forcePressEnabled => false;
+
+  @override
+  bool get selectionEnabled => true;
+
+  late final TextSelectionGestureDetectorBuilder _gestures =
+      TextSelectionGestureDetectorBuilder(delegate: this);
+
   final MaunaTextController _query = MaunaTextController();
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scroll = ScrollController();
@@ -375,29 +389,34 @@ class _MaunaCommandPaletteState extends State<MaunaCommandPalette> {
                         const SingleActivator(LogicalKeyboardKey.escape): () =>
                             Navigator.of(context).pop(),
                       },
-                      child: Stack(
-                        children: <Widget>[
-                          if (_query.text.isEmpty)
-                            IgnorePointer(
-                              child: Text(
-                                widget.placeholder,
-                                style: queryStyle.copyWith(
-                                  color: theme.textSecondary,
+                      child: _gestures.buildGestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        child: Stack(
+                          children: <Widget>[
+                            if (_query.text.isEmpty)
+                              IgnorePointer(
+                                child: Text(
+                                  widget.placeholder,
+                                  style: queryStyle.copyWith(
+                                    color: theme.textSecondary,
+                                  ),
                                 ),
                               ),
+                            EditableText(
+                              key: editableTextKey,
+                              controller: _query,
+                              focusNode: _focusNode,
+                              autofocus: true,
+                              style: queryStyle,
+                              cursorColor: theme.accent,
+                              backgroundCursorColor: theme.textSecondary,
+                              cursorWidth: theme.metrics.cursorWidth,
+                              selectionColor: theme.selectionColor,
+                              onSubmitted: (String value) => _runHighlighted(),
+                              rendererIgnoresPointer: true,
                             ),
-                          EditableText(
-                            controller: _query,
-                            focusNode: _focusNode,
-                            autofocus: true,
-                            style: queryStyle,
-                            cursorColor: theme.accent,
-                            backgroundCursorColor: theme.textSecondary,
-                            cursorWidth: theme.metrics.cursorWidth,
-                            selectionColor: theme.selectionColor,
-                            onSubmitted: (String value) => _runHighlighted(),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),

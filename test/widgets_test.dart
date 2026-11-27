@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mauna/mauna.dart';
@@ -9,6 +10,38 @@ Widget _app(Widget child) {
     theme: MaunaThemeData.light().toMaterialTheme(),
     home: Scaffold(body: child),
   );
+}
+
+const String _words = 'alpha bravo charlie';
+
+Offset _textPoint(WidgetTester tester, int offset) {
+  final RenderEditable editable = tester
+      .state<EditableTextState>(find.byType(EditableText))
+      .renderEditable;
+  return editable.localToGlobal(
+    editable.getLocalRectForCaret(TextPosition(offset: offset)).center,
+  );
+}
+
+Future<void> _drag(WidgetTester tester, Offset from, Offset to) async {
+  final TestGesture gesture = await tester.startGesture(
+    from,
+    kind: PointerDeviceKind.mouse,
+  );
+  await tester.pump();
+  await gesture.moveTo(Offset.lerp(from, to, 0.5)!);
+  await tester.pump();
+  await gesture.moveTo(to);
+  await tester.pump();
+  await gesture.up();
+  await tester.pumpAndSettle();
+}
+
+Future<void> _doubleClick(WidgetTester tester, Offset at) async {
+  await tester.tapAt(at, kind: PointerDeviceKind.mouse);
+  await tester.pump(const Duration(milliseconds: 50));
+  await tester.tapAt(at, kind: PointerDeviceKind.mouse);
+  await tester.pumpAndSettle();
 }
 
 void main() {
@@ -514,5 +547,115 @@ void main() {
     await tester.pumpAndSettle();
     expect(ran, 'open');
     expect(find.byType(MaunaCommandPalette), findsNothing);
+  });
+
+  testWidgets('text field selects with the mouse', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: _words,
+    );
+    final FocusNode focusNode = FocusNode();
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      _app(
+        Center(
+          child: SizedBox(
+            width: 300,
+            child: MaunaTextField(
+              controller: controller,
+              focusNode: focusNode,
+              placeholder: 'Name',
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await _drag(tester, _textPoint(tester, 6), _textPoint(tester, 11));
+    expect(controller.selection.textInside(_words), 'bravo');
+    expect(focusNode.hasFocus, isTrue);
+
+    await tester.pump(const Duration(seconds: 1));
+    await _doubleClick(tester, _textPoint(tester, 14));
+    expect(controller.selection.textInside(_words), 'charlie');
+
+    await tester.pump(const Duration(seconds: 1));
+    final Rect box = tester.getRect(find.byType(MaunaTextField));
+    final Offset edge = Offset(box.right - 4, box.top + 3);
+    await tester.tapAt(edge, kind: PointerDeviceKind.mouse);
+    await tester.pumpAndSettle();
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(
+        offset: _words.length,
+        affinity: TextAffinity.upstream,
+      ),
+    );
+
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tapAt(
+      _textPoint(tester, 2),
+      buttons: kSecondaryButton,
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('empty text field takes focus on a click in its padding', (
+    WidgetTester tester,
+  ) async {
+    final TextEditingController controller = TextEditingController();
+    final FocusNode focusNode = FocusNode();
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      _app(
+        Center(
+          child: SizedBox(
+            width: 300,
+            child: MaunaTextField(
+              controller: controller,
+              focusNode: focusNode,
+              placeholder: 'Name',
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Rect box = tester.getRect(find.byType(MaunaTextField));
+    await tester.tapAt(
+      Offset(box.left + 2, box.top + 2),
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasFocus, isTrue);
+  });
+
+  testWidgets('command palette query selects with the mouse', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(
+        Center(
+          child: MaunaCommandPalette(
+            commands: <MaunaCommand>[
+              MaunaCommand(label: 'Save', onSelected: () {}),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.enterText(find.byType(EditableText), _words);
+    await tester.pump();
+
+    await _drag(tester, _textPoint(tester, 6), _textPoint(tester, 11));
+
+    final TextEditingController query = tester
+        .widget<EditableText>(find.byType(EditableText))
+        .controller;
+    expect(query.selection.textInside(_words), 'bravo');
   });
 }
